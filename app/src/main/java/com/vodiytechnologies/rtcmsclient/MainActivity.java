@@ -21,6 +21,9 @@ import com.google.android.gms.location.LocationServices;
 import com.github.nkzawa.socketio.client.IO;
 import com.github.nkzawa.socketio.client.Socket;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.net.URISyntaxException;
 
 
@@ -72,13 +75,28 @@ public class MainActivity extends Activity implements ConnectionCallbacks, OnCon
                 }
             }).on("news", new Emitter.Listener() {
                 @Override
-                public void call(Object... args) {
+                public void call(final Object... args) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            JSONObject data = (JSONObject) args[0];
+                            String hello;
+                            try {
+                                hello = data.getString("hello");
+                            } catch (JSONException e) {
+                                return;
+                            }
 
+                            // update UI
+                            showMessage(hello);
+                        }
+                    });
                 }
-            })
+            });
 
 
             mSocket.connect();
+
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }
@@ -93,6 +111,10 @@ public class MainActivity extends Activity implements ConnectionCallbacks, OnCon
             mLongitudeTextView.setText(String.valueOf(longitude));
             mLatitudeTextView.setText(String.valueOf(latitude));
         }
+    }
+
+    public void showMessage(String message) {
+        mMessageTextView.setText(message);
     }
 
     /* Google Play Services */
@@ -125,28 +147,6 @@ public class MainActivity extends Activity implements ConnectionCallbacks, OnCon
         if (mGoogleApiClient != null) {
             mGoogleApiClient.connect();
         }
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        if (mGoogleApiClient.isConnected() && mRequestingLocationUpdates) {
-            startLocationUpdates();
-        }
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        stopLocationUpdates();
-    }
-
-    @Override
-    protected void onStop() {
-        mGoogleApiClient.disconnect();
-
-        super.onStart();
     }
 
     // creating location request object
@@ -195,6 +195,28 @@ public class MainActivity extends Activity implements ConnectionCallbacks, OnCon
         mCurrentLocation = location;
 
         displayLocation();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        if (mGoogleApiClient.isConnected() && mRequestingLocationUpdates) {
+            startLocationUpdates();
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        stopLocationUpdates();
+    }
+
+    @Override
+    protected void onStop() {
+        mGoogleApiClient.disconnect();
+
+        super.onStart();
     }
 
 }
