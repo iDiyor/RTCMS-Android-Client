@@ -41,6 +41,13 @@ public class MainActivity extends Activity implements ConnectionCallbacks, OnCon
 
     // socket.io
     private Socket mSocket;
+    {
+        try {
+            mSocket = IO.socket("http://52.28.143.209:3000");
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
 
     // TextViews
@@ -64,57 +71,111 @@ public class MainActivity extends Activity implements ConnectionCallbacks, OnCon
             //createLocationRequest();
         }
 
+        mSocket.on(Socket.EVENT_CONNECT_ERROR, onConnectError);
+        mSocket.on(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
+        mSocket.on(Socket.EVENT_CONNECT, onConnectToServer);
+        mSocket.on("server:message", onServerMessage);
 
-        try {
-            mSocket = IO.socket("http://52.28.143.209:3000");
-            mSocket.on(Socket.EVENT_CONNECT, new Emitter.Listener() {
-                @Override
-                public void call(Object... args) {
-                    mSocket.emit("foo", "hi from android");
-                    mSocket.disconnect();
-                }
-            }).on("news", new Emitter.Listener() {
-                @Override
-                public void call(final Object... args) {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            JSONObject data = (JSONObject) args[0];
-                            String hello;
-                            try {
-                                hello = data.getString("hello");
-                            } catch (JSONException e) {
-                                return;
-                            }
+//        mSocket.on(Socket.EVENT_CONNECT, new Emitter.Listener() {
+//            @Override
+//            public void call(Object... args) {
+//                mSocket.emit("foo", "hi from android");
+//                //mSocket.disconnect();
+//            }
+//        }).on("news", new Emitter.Listener() {
+//            @Override
+//            public void call(final Object... args) {
+//                runOnUiThread(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        JSONObject data = (JSONObject) args[0];
+//                        String hello;
+//                        try {
+//                            hello = data.getString("hello");
+//                        } catch (JSONException e) {
+//                            return;
+//                        }
+//
+//                        // update UI
+//                        showMessage(hello);
+//                        Log.d("IO", "After Show Message");
+//                    }
+//                });
+//            }
+//        });
+        mSocket.connect();
 
-                            // update UI
-                            showMessage(hello);
-                        }
-                    });
+    }
+
+    private void setCurrentLocation(Location location) {
+        mCurrentLocation = location;
+    }
+
+    public Location getCurrentLocation() {
+        if (mCurrentLocation != null)
+            return mCurrentLocation;
+        return null;
+    }
+
+    // socket io handler functions
+    private Emitter.Listener onConnectError = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(getApplicationContext(), "Error with socket.io connection", Toast.LENGTH_LONG).show();
                 }
             });
-
-
-            mSocket.connect();
-
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
         }
+    };
 
+    private Emitter.Listener onConnectToServer = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    mSocket.emit("mobile:connection", "android");
+                }
+            });
+        }
+    };
+
+    private Emitter.Listener onServerMessage = new Emitter.Listener() {
+        @Override
+        public void call(final Object... args) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    JSONObject data = (JSONObject) args[0];
+                    String message;
+                    try {
+                        message = data.getString("status");
+                    } catch (JSONException e) {
+                        return;
+                    }
+
+                    // update UI
+                    showMessage(message);
+                    Log.d("IO", "After Show Message");
+                }
+            });
+        }
+    };
+
+    // message from server
+    public void showMessage(String message) {
+        mMessageTextView.setText(message);
     }
 
     public void displayLocation() {
-
-        if (mCurrentLocation != null) {
-            double latitude = mCurrentLocation.getLatitude();
-            double longitude = mCurrentLocation.getLongitude();
+        if (getCurrentLocation() != null) {
+            double latitude = getCurrentLocation().getLatitude();
+            double longitude = getCurrentLocation().getLongitude();
             mLongitudeTextView.setText(String.valueOf(longitude));
             mLatitudeTextView.setText(String.valueOf(latitude));
         }
-    }
-
-    public void showMessage(String message) {
-        mMessageTextView.setText(message);
     }
 
     /* Google Play Services */
@@ -141,14 +202,6 @@ public class MainActivity extends Activity implements ConnectionCallbacks, OnCon
         return true;
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-        if (mGoogleApiClient != null) {
-            mGoogleApiClient.connect();
-        }
-    }
-
     // creating location request object
     protected void createLocationRequest() {
         mLocationRequest = new LocationRequest();
@@ -173,7 +226,7 @@ public class MainActivity extends Activity implements ConnectionCallbacks, OnCon
     @Override
     public void onConnected(Bundle bundle) {
         // display location here
-        displayLocation();
+        //displayLocation();
 
         if (mRequestingLocationUpdates) {
             startLocationUpdates();
@@ -192,9 +245,28 @@ public class MainActivity extends Activity implements ConnectionCallbacks, OnCon
 
     @Override
     public void onLocationChanged(Location location) {
-        mCurrentLocation = location;
-
+        // sets global myCurrentLocation
+        setCurrentLocation(location);
+        // displays current location
         displayLocation();
+
+        try {
+            JSONObject data = new JSONObject();
+            data.put("longitude", location.getLongitude());
+            data.put("latitude", location.getLatitude());
+            mSocket.emit("mobile:location", data);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (mGoogleApiClient != null) {
+            mGoogleApiClient.connect();
+        }
     }
 
     @Override
@@ -218,5 +290,4 @@ public class MainActivity extends Activity implements ConnectionCallbacks, OnCon
 
         super.onStart();
     }
-
 }
