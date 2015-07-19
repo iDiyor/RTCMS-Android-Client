@@ -138,7 +138,8 @@ public class MainActivity extends Activity implements ConnectionCallbacks, OnCon
                 public void run() {
                     JSONObject data = new JSONObject();
                     try {
-                        data.put("client", "mobile");
+                        data.put("type", "mobile");
+                        data.put("name", "android");
                         mSocket.emit("client:connection", data);
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -301,7 +302,8 @@ public class MainActivity extends Activity implements ConnectionCallbacks, OnCon
         // send disconnect event to the server, which notifies web app
         JSONObject data = new JSONObject();
         try {
-            data.put("client", "mobile");
+            data.put("type", "mobile");
+            data.put("name", "android");
             mSocket.emit("client:disconnection", data);
         } catch (JSONException e) {
             e.printStackTrace();
