@@ -136,7 +136,13 @@ public class MainActivity extends Activity implements ConnectionCallbacks, OnCon
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    mSocket.emit("mobile:connection", "android");
+                    JSONObject data = new JSONObject();
+                    try {
+                        data.put("client", "mobile");
+                        mSocket.emit("client:connection", data);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
                 }
             });
         }
@@ -254,6 +260,10 @@ public class MainActivity extends Activity implements ConnectionCallbacks, OnCon
             JSONObject data = new JSONObject();
             data.put("longitude", location.getLongitude());
             data.put("latitude", location.getLatitude());
+            data.put("accuracy", location.getAccuracy());
+            data.put("bearing", location.getBearing());
+            data.put("speed", location.getSpeed());
+            data.put("time", location.getTime());
             mSocket.emit("mobile:location", data);
         } catch (JSONException e) {
             e.printStackTrace();
@@ -288,6 +298,21 @@ public class MainActivity extends Activity implements ConnectionCallbacks, OnCon
     protected void onStop() {
         mGoogleApiClient.disconnect();
 
-        super.onStart();
+        // send disconnect event to the server, which notifies web app
+        JSONObject data = new JSONObject();
+        try {
+            data.put("client", "mobile");
+            mSocket.emit("client:disconnection", data);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        // disconnecting the socket
+        mSocket.disconnect();
+        mSocket.off(Socket.EVENT_CONNECT_ERROR, onConnectError);
+        mSocket.off(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
+        mSocket.off("server:message", onServerMessage);
+
+        super.onStop();
     }
 }
