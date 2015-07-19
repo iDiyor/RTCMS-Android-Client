@@ -71,39 +71,39 @@ public class MainActivity extends Activity implements ConnectionCallbacks, OnCon
             //createLocationRequest();
         }
 
-        mSocket.on(Socket.EVENT_CONNECT_ERROR, onConnectError);
-        mSocket.on(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
-        mSocket.on(Socket.EVENT_CONNECT, onConnectToServer);
-        mSocket.on("server:message", onServerMessage);
-
-//        mSocket.on(Socket.EVENT_CONNECT, new Emitter.Listener() {
-//            @Override
-//            public void call(Object... args) {
-//                mSocket.emit("foo", "hi from android");
-//                //mSocket.disconnect();
-//            }
-//        }).on("news", new Emitter.Listener() {
-//            @Override
-//            public void call(final Object... args) {
-//                runOnUiThread(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        JSONObject data = (JSONObject) args[0];
-//                        String hello;
-//                        try {
-//                            hello = data.getString("hello");
-//                        } catch (JSONException e) {
-//                            return;
-//                        }
+//        mSocket.on(Socket.EVENT_CONNECT_ERROR, onConnectError);
+//        mSocket.on(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
+//        mSocket.on(Socket.EVENT_CONNECT, onConnectToServer);
+//        mSocket.on("server:message", onServerMessage);
 //
-//                        // update UI
-//                        showMessage(hello);
-//                        Log.d("IO", "After Show Message");
-//                    }
-//                });
-//            }
-//        });
-        mSocket.connect();
+////        mSocket.on(Socket.EVENT_CONNECT, new Emitter.Listener() {
+////            @Override
+////            public void call(Object... args) {
+////                mSocket.emit("foo", "hi from android");
+////                //mSocket.disconnect();
+////            }
+////        }).on("news", new Emitter.Listener() {
+////            @Override
+////            public void call(final Object... args) {
+////                runOnUiThread(new Runnable() {
+////                    @Override
+////                    public void run() {
+////                        JSONObject data = (JSONObject) args[0];
+////                        String hello;
+////                        try {
+////                            hello = data.getString("hello");
+////                        } catch (JSONException e) {
+////                            return;
+////                        }
+////
+////                        // update UI
+////                        showMessage(hello);
+////                        Log.d("IO", "After Show Message");
+////                    }
+////                });
+////            }
+////        });
+//        mSocket.connect();
 
     }
 
@@ -278,6 +278,14 @@ public class MainActivity extends Activity implements ConnectionCallbacks, OnCon
         if (mGoogleApiClient != null) {
             mGoogleApiClient.connect();
         }
+
+        if (!mSocket.connected()) {
+            mSocket.on(Socket.EVENT_CONNECT_ERROR, onConnectError);
+            mSocket.on(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
+            mSocket.on(Socket.EVENT_CONNECT, onConnectToServer);
+            mSocket.on("server:message", onServerMessage);
+            mSocket.connect();
+        }
     }
 
     @Override
@@ -310,11 +318,18 @@ public class MainActivity extends Activity implements ConnectionCallbacks, OnCon
         }
 
         // disconnecting the socket
-        mSocket.disconnect();
+
         mSocket.off(Socket.EVENT_CONNECT_ERROR, onConnectError);
         mSocket.off(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
+        mSocket.off(Socket.EVENT_CONNECT, onConnectToServer);
         mSocket.off("server:message", onServerMessage);
+        mSocket.disconnect();
 
         super.onStop();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
     }
 }
