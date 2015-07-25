@@ -25,17 +25,17 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
 
-public class MainActivity extends Activity implements ConnectionCallbacks, OnConnectionFailedListener , LocationListener{ //SocketResultReceiver.Receiver {
+public class MainActivity extends Activity {//implements ConnectionCallbacks, OnConnectionFailedListener , LocationListener{ //SocketResultReceiver.Receiver {
 
-    private final static int PLAY_SERVICE_RESOLUTION_REQ = 1000;
+//    private final static int PLAY_SERVICE_RESOLUTION_REQ = 1000;
     private Location mCurrentLocation;
-    private GoogleApiClient mGoogleApiClient;
-    private boolean mRequestingLocationUpdates = false;
-    private LocationRequest mLocationRequest;
-
-    private static int UPDATE_INTERVAL = 1000 * 10; // 10 sec
-    private static int FASTEST_INTERVAL = 1000 * 5; // 5 sec
-    private static int DISPLACEMENT = 5; // 5 meters
+//    private GoogleApiClient mGoogleApiClient;
+//    private boolean mRequestingLocationUpdates = false;
+//    private LocationRequest mLocationRequest;
+//
+//    private static int UPDATE_INTERVAL = 1000 * 10; // 10 sec
+//    private static int FASTEST_INTERVAL = 1000 * 5; // 5 sec
+//    private static int DISPLACEMENT = 5; // 5 meters
 
     // TextViews
     private TextView mLongitudeTextView;
@@ -51,19 +51,23 @@ public class MainActivity extends Activity implements ConnectionCallbacks, OnCon
         mLatitudeTextView = (TextView) findViewById(R.id.latitudeId);
         mMessageTextView = (TextView) findViewById(R.id.messageId);
 
-        mRequestingLocationUpdates = true;
+        //mRequestingLocationUpdates = true;
 
-        if (checkPlayServices()) {
-            buildGoogleApiClient();
-            //createLocationRequest();
-        }
+//        if (checkPlayServices()) {
+//            buildGoogleApiClient();
+//
+//        }
 
         Button startServiceButton = (Button) findViewById(R.id.startServiceButtonId);
         startServiceButton.setOnClickListener(new View.OnClickListener() {
               @Override
               public void onClick(View v) {
-                  Intent intent = new Intent(MainActivity.this, SocketService.class);
-                  startService(intent);
+                  Intent socketIntent = new Intent(MainActivity.this, SocketService.class);
+                  startService(socketIntent);
+
+                  Intent locationIntent = new Intent(MainActivity.this, LocationService.class);
+                  startService(locationIntent);
+
               }
         });
 
@@ -73,6 +77,11 @@ public class MainActivity extends Activity implements ConnectionCallbacks, OnCon
             public void onClick(View v) {
                 Intent intent = new Intent(MainActivity.this, SocketService.class);
                 stopService(intent);
+                showMessage("Socket connection disconnected");
+
+                Intent locationIntent = new Intent(MainActivity.this, LocationService.class);
+                stopService(locationIntent);
+                setCurrentLocation(null);
             }
         });
     }
@@ -98,100 +107,105 @@ public class MainActivity extends Activity implements ConnectionCallbacks, OnCon
             double longitude = getCurrentLocation().getLongitude();
             mLongitudeTextView.setText(String.valueOf(longitude));
             mLatitudeTextView.setText(String.valueOf(latitude));
+        } else {
+            mLongitudeTextView.setText("Location Service is not available");
+            mLatitudeTextView.setText("Location Service is not available");
         }
     }
 
-    /* Google Play Services */
-    protected synchronized void buildGoogleApiClient() {
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .addApi(LocationServices.API).build();
-        createLocationRequest();
-    }
-
-    private boolean checkPlayServices() {
-        int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
-
-        if (resultCode != ConnectionResult.SUCCESS) {
-            if (GooglePlayServicesUtil.isUserRecoverableError(resultCode)) {
-                GooglePlayServicesUtil.getErrorDialog(resultCode, this, PLAY_SERVICE_RESOLUTION_REQ).show();
-            } else {
-                Toast.makeText(getApplicationContext(), "This Device is not supported", Toast.LENGTH_LONG).show();
-                finish();
-            }
-            return false;
-        }
-        return true;
-    }
-
-    // creating location request object
-    protected void createLocationRequest() {
-        mLocationRequest = new LocationRequest();
-        mLocationRequest.setInterval(UPDATE_INTERVAL);
-        mLocationRequest.setFastestInterval(FASTEST_INTERVAL);
-        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        mLocationRequest.setSmallestDisplacement(DISPLACEMENT);
-    }
-
-
-    // starting location updates
-    protected void startLocationUpdates() {
-        LocationServices.FusedLocationApi.requestLocationUpdates(
-                mGoogleApiClient, mLocationRequest, this);
-    }
-
-    // stop location updates
-    protected void stopLocationUpdates() {
-        LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
-    }
-
-    @Override
-    public void onConnected(Bundle bundle) {
-        // display location here
-        //displayLocation();
-
-        if (mRequestingLocationUpdates) {
-            startLocationUpdates();
-        }
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-        mGoogleApiClient.connect();
-    }
-
-    @Override
-    public void onConnectionFailed(ConnectionResult connectionResult) {
-        Log.d("message", "Connection Failed");
-    }
-
-    @Override
-    public void onLocationChanged(Location location) {
-        // sets global myCurrentLocation
-        setCurrentLocation(location);
-        // displays current location
-        displayLocation();
-
-    }
+//    /* Google Play Services */
+//    protected synchronized void buildGoogleApiClient() {
+//        mGoogleApiClient = new GoogleApiClient.Builder(this)
+//                .addConnectionCallbacks(this)
+//                .addOnConnectionFailedListener(this)
+//                .addApi(LocationServices.API).build();
+//        createLocationRequest();
+//    }
+//
+//    private boolean checkPlayServices() {
+//        int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
+//
+//        if (resultCode != ConnectionResult.SUCCESS) {
+//            if (GooglePlayServicesUtil.isUserRecoverableError(resultCode)) {
+//                GooglePlayServicesUtil.getErrorDialog(resultCode, this, PLAY_SERVICE_RESOLUTION_REQ).show();
+//            } else {
+//                Toast.makeText(getApplicationContext(), "This Device is not supported", Toast.LENGTH_LONG).show();
+//                finish();
+//            }
+//            return false;
+//        }
+//        return true;
+//    }
+//
+//    // creating location request object
+//    protected void createLocationRequest() {
+//        mLocationRequest = new LocationRequest();
+//        mLocationRequest.setInterval(UPDATE_INTERVAL);
+//        mLocationRequest.setFastestInterval(FASTEST_INTERVAL);
+//        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+//        mLocationRequest.setSmallestDisplacement(DISPLACEMENT);
+//    }
+//
+//
+//    // starting location updates
+//    protected void startLocationUpdates() {
+//        LocationServices.FusedLocationApi.requestLocationUpdates(
+//                mGoogleApiClient, mLocationRequest, this);
+//    }
+//
+//    // stop location updates
+//    protected void stopLocationUpdates() {
+//        LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
+//    }
+//
+//    @Override
+//    public void onConnected(Bundle bundle) {
+//        // display location here
+//        //displayLocation();
+//
+//        if (mRequestingLocationUpdates) {
+//            startLocationUpdates();
+//        }
+//    }
+//
+//    @Override
+//    public void onConnectionSuspended(int i) {
+//        mGoogleApiClient.connect();
+//    }
+//
+//    @Override
+//    public void onConnectionFailed(ConnectionResult connectionResult) {
+//        Log.d("message", "Connection Failed");
+//    }
+//
+//    @Override
+//    public void onLocationChanged(Location location) {
+//        // sets global myCurrentLocation
+//        setCurrentLocation(location);
+//        // displays current location
+//        displayLocation();
+//
+//    }
 
     @Override
     protected void onStart() {
         super.onStart();
-        if (mGoogleApiClient != null) {
-            mGoogleApiClient.connect();
-        }
+//        if (mGoogleApiClient != null) {
+//            mGoogleApiClient.connect();
+//        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
 
-        if (mGoogleApiClient.isConnected() && mRequestingLocationUpdates) {
-            startLocationUpdates();
-        }
+//        if (mGoogleApiClient.isConnected() && mRequestingLocationUpdates) {
+//            startLocationUpdates();
+//        }
 
-        // register receiver
+        /**
+         * SOCKET SERVICE BROADCAST REGISTER
+         */
         IntentFilter connectionSuccessIntentFilter = new IntentFilter(SocketService.SOCKET_CONNECTION_SUCCESS_ACTION);
         IntentFilter messageFromServerIntentFilter = new IntentFilter(SocketService.SOCKET_MESSAGE_FROM_SERVER_ACTION);
         IntentFilter connectionErrorIntentFilter = new IntentFilter(SocketService.SOCKET_CONNECTION_ERROR_ACTION);
@@ -199,12 +213,19 @@ public class MainActivity extends Activity implements ConnectionCallbacks, OnCon
         LocalBroadcastManager.getInstance(this).registerReceiver(receiver, connectionSuccessIntentFilter);
         LocalBroadcastManager.getInstance(this).registerReceiver(receiver, messageFromServerIntentFilter);
         LocalBroadcastManager.getInstance(this).registerReceiver(receiver, connectionErrorIntentFilter);
+
+        /**
+         * LOCATION SERVICE BROADCAST REGISTER
+         */
+        IntentFilter locationUpdateIntentFilter = new IntentFilter(LocationService.LOCATION_UPDATE_ACTION);
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(receiver, locationUpdateIntentFilter);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        stopLocationUpdates();
+//        stopLocationUpdates();
 
         // unregister receiver
         LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver);
@@ -212,7 +233,7 @@ public class MainActivity extends Activity implements ConnectionCallbacks, OnCon
 
     @Override
     protected void onStop() {
-        mGoogleApiClient.disconnect();
+//        mGoogleApiClient.disconnect();
         super.onStop();
     }
 
@@ -225,6 +246,9 @@ public class MainActivity extends Activity implements ConnectionCallbacks, OnCon
     private BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            /**************************
+            * SOCKET SERVICE BROADCAST
+            ***************************/
             if (intent.getAction().equals(SocketService.SOCKET_CONNECTION_SUCCESS_ACTION)) {
                 String message = intent.getStringExtra(SocketService.CONNECTION_STATUS);
                 showMessage(message);
@@ -242,6 +266,17 @@ public class MainActivity extends Activity implements ConnectionCallbacks, OnCon
                 showMessage(message);
                 Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
             }
+
+            /****************************
+            * LOCATION SERVICE BROADCAST
+            ****************************/
+            if (intent.getAction().equals(LocationService.LOCATION_UPDATE_ACTION)) {
+                Location location = intent.getParcelableExtra(LocationService.LOCATION_MESSAGE);
+                setCurrentLocation(location);
+                displayLocation();
+                //Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
+            }
+
         }
     };
 }

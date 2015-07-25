@@ -19,8 +19,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        
+
+        <!--SOCKET SERVICE-->
         <service android:name=".SocketService"/>
+        <!--LOCATION SERVICE-->
+        <service android:name=".LocationService"/>
     </application>
 
 </manifest>

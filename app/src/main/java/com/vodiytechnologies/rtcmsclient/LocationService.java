@@ -40,6 +40,10 @@ public class LocationService extends Service implements ConnectionCallbacks, OnC
 
     private static final String TAG = "LocationService:Message";
 
+    public static final String LOCATION_UPDATE_ACTION = "LOCATION_UPDATE_ACTION";
+
+    public static final String LOCATION_MESSAGE = "LOCATION";
+
     private Looper mServiceLooper;
     private ServiceHandler mServiceHandler;
 
@@ -52,6 +56,10 @@ public class LocationService extends Service implements ConnectionCallbacks, OnC
         public void handleMessage(Message msg) {
 
             // do work here
+
+            if (mGoogleApiClient.isConnected() && mRequestingLocationUpdates) {
+                startLocationUpdates();
+            }
         }
     }
 
@@ -64,6 +72,8 @@ public class LocationService extends Service implements ConnectionCallbacks, OnC
     public void onCreate() {
         super.onCreate();
 
+        mRequestingLocationUpdates = true;
+
         if (checkPlayServices()) {
             buildGoogleApiClient();
             //createLocationRequest();
@@ -71,10 +81,6 @@ public class LocationService extends Service implements ConnectionCallbacks, OnC
 
         if (mGoogleApiClient != null) {
             mGoogleApiClient.connect();
-        }
-
-        if (mGoogleApiClient.isConnected() && mRequestingLocationUpdates) {
-            startLocationUpdates();
         }
 
         HandlerThread thread = new HandlerThread("LocationServiceStartArgs", Process.THREAD_PRIORITY_BACKGROUND);
@@ -104,6 +110,11 @@ public class LocationService extends Service implements ConnectionCallbacks, OnC
         mGoogleApiClient.disconnect();
     }
 
+    public void broadcastLocation(String name, String action) {
+        Intent i = new Intent(action);
+        i.putExtra(name, getCurrentLocation());
+        LocalBroadcastManager.getInstance(this).sendBroadcast(i);
+    }
 
     /*****************************
      * LOCATION LISTENER METHODS
@@ -123,6 +134,8 @@ public class LocationService extends Service implements ConnectionCallbacks, OnC
     @Override
     public void onLocationChanged(Location location) {
         setCurrentLocation(location);
+
+        broadcastLocation(LOCATION_MESSAGE, LOCATION_UPDATE_ACTION);
     }
 
 
