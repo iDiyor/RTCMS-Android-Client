@@ -34,4 +34,14 @@
         android:layout_gravity="center"
         android:text="No message from the server"/>
 
+    <Button
+        android:id="@+id/startServiceButtonId"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Start Service"/>
+    <Button
+        android:id="@+id/stopServiceButtonId"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Stop Service"/>
 </LinearLayout>

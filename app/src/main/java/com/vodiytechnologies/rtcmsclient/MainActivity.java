@@ -1,14 +1,20 @@
 package com.vodiytechnologies.rtcmsclient;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.Handler;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.github.nkzawa.emitter.Emitter;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -18,16 +24,8 @@ import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
-import com.github.nkzawa.socketio.client.IO;
-import com.github.nkzawa.socketio.client.Socket;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.net.URISyntaxException;
-
-
-public class MainActivity extends Activity implements ConnectionCallbacks, OnConnectionFailedListener , LocationListener{
+public class MainActivity extends Activity implements ConnectionCallbacks, OnConnectionFailedListener , LocationListener{ //SocketResultReceiver.Receiver {
 
     private final static int PLAY_SERVICE_RESOLUTION_REQ = 1000;
     private Location mCurrentLocation;
@@ -38,17 +36,6 @@ public class MainActivity extends Activity implements ConnectionCallbacks, OnCon
     private static int UPDATE_INTERVAL = 1000 * 10; // 10 sec
     private static int FASTEST_INTERVAL = 1000 * 5; // 5 sec
     private static int DISPLACEMENT = 5; // 5 meters
-
-    // socket.io
-    private Socket mSocket;
-    {
-        try {
-            mSocket = IO.socket("http://52.28.143.209:3000");
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
 
     // TextViews
     private TextView mLongitudeTextView;
@@ -71,40 +58,23 @@ public class MainActivity extends Activity implements ConnectionCallbacks, OnCon
             //createLocationRequest();
         }
 
-//        mSocket.on(Socket.EVENT_CONNECT_ERROR, onConnectError);
-//        mSocket.on(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
-//        mSocket.on(Socket.EVENT_CONNECT, onConnectToServer);
-//        mSocket.on("server:message", onServerMessage);
-//
-////        mSocket.on(Socket.EVENT_CONNECT, new Emitter.Listener() {
-////            @Override
-////            public void call(Object... args) {
-////                mSocket.emit("foo", "hi from android");
-////                //mSocket.disconnect();
-////            }
-////        }).on("news", new Emitter.Listener() {
-////            @Override
-////            public void call(final Object... args) {
-////                runOnUiThread(new Runnable() {
-////                    @Override
-////                    public void run() {
-////                        JSONObject data = (JSONObject) args[0];
-////                        String hello;
-////                        try {
-////                            hello = data.getString("hello");
-////                        } catch (JSONException e) {
-////                            return;
-////                        }
-////
-////                        // update UI
-////                        showMessage(hello);
-////                        Log.d("IO", "After Show Message");
-////                    }
-////                });
-////            }
-////        });
-//        mSocket.connect();
+        Button startServiceButton = (Button) findViewById(R.id.startServiceButtonId);
+        startServiceButton.setOnClickListener(new View.OnClickListener() {
+              @Override
+              public void onClick(View v) {
+                  Intent intent = new Intent(MainActivity.this, SocketService.class);
+                  startService(intent);
+              }
+        });
 
+        Button stopServiceButton = (Button) findViewById(R.id.stopServiceButtonId);
+        stopServiceButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, SocketService.class);
+                stopService(intent);
+            }
+        });
     }
 
     private void setCurrentLocation(Location location) {
@@ -116,60 +86,6 @@ public class MainActivity extends Activity implements ConnectionCallbacks, OnCon
             return mCurrentLocation;
         return null;
     }
-
-    // socket io handler functions
-    private Emitter.Listener onConnectError = new Emitter.Listener() {
-        @Override
-        public void call(Object... args) {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    Toast.makeText(getApplicationContext(), "Error with socket.io connection", Toast.LENGTH_LONG).show();
-                }
-            });
-        }
-    };
-
-    private Emitter.Listener onConnectToServer = new Emitter.Listener() {
-        @Override
-        public void call(Object... args) {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    JSONObject data = new JSONObject();
-                    try {
-                        data.put("type", "mobile");
-                        data.put("name", "android");
-                        mSocket.emit("client:connection", data);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
-            });
-        }
-    };
-
-    private Emitter.Listener onServerMessage = new Emitter.Listener() {
-        @Override
-        public void call(final Object... args) {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    JSONObject data = (JSONObject) args[0];
-                    String message;
-                    try {
-                        message = data.getString("status");
-                    } catch (JSONException e) {
-                        return;
-                    }
-
-                    // update UI
-                    showMessage(message);
-                    Log.d("IO", "After Show Message");
-                }
-            });
-        }
-    };
 
     // message from server
     public void showMessage(String message) {
@@ -257,19 +173,6 @@ public class MainActivity extends Activity implements ConnectionCallbacks, OnCon
         // displays current location
         displayLocation();
 
-        try {
-            JSONObject data = new JSONObject();
-            data.put("longitude", location.getLongitude());
-            data.put("latitude", location.getLatitude());
-            data.put("accuracy", location.getAccuracy());
-            data.put("bearing", location.getBearing());
-            data.put("speed", location.getSpeed());
-            data.put("time", location.getTime());
-            mSocket.emit("mobile:location", data);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
     }
 
     @Override
@@ -277,14 +180,6 @@ public class MainActivity extends Activity implements ConnectionCallbacks, OnCon
         super.onStart();
         if (mGoogleApiClient != null) {
             mGoogleApiClient.connect();
-        }
-
-        if (!mSocket.connected()) {
-            mSocket.on(Socket.EVENT_CONNECT_ERROR, onConnectError);
-            mSocket.on(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
-            mSocket.on(Socket.EVENT_CONNECT, onConnectToServer);
-            mSocket.on("server:message", onServerMessage);
-            mSocket.connect();
         }
     }
 
@@ -295,41 +190,58 @@ public class MainActivity extends Activity implements ConnectionCallbacks, OnCon
         if (mGoogleApiClient.isConnected() && mRequestingLocationUpdates) {
             startLocationUpdates();
         }
+
+        // register receiver
+        IntentFilter connectionSuccessIntentFilter = new IntentFilter(SocketService.SOCKET_CONNECTION_SUCCESS_ACTION);
+        IntentFilter messageFromServerIntentFilter = new IntentFilter(SocketService.SOCKET_MESSAGE_FROM_SERVER_ACTION);
+        IntentFilter connectionErrorIntentFilter = new IntentFilter(SocketService.SOCKET_CONNECTION_ERROR_ACTION);
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(receiver, connectionSuccessIntentFilter);
+        LocalBroadcastManager.getInstance(this).registerReceiver(receiver, messageFromServerIntentFilter);
+        LocalBroadcastManager.getInstance(this).registerReceiver(receiver, connectionErrorIntentFilter);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         stopLocationUpdates();
+
+        // unregister receiver
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver);
     }
 
     @Override
     protected void onStop() {
         mGoogleApiClient.disconnect();
-
-        // send disconnect event to the server, which notifies web app
-        JSONObject data = new JSONObject();
-        try {
-            data.put("type", "mobile");
-            data.put("name", "android");
-            mSocket.emit("client:disconnection", data);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        // disconnecting the socket
-
-        mSocket.off(Socket.EVENT_CONNECT_ERROR, onConnectError);
-        mSocket.off(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
-        mSocket.off(Socket.EVENT_CONNECT, onConnectToServer);
-        mSocket.off("server:message", onServerMessage);
-        mSocket.disconnect();
-
         super.onStop();
     }
 
     @Override
     protected void onDestroy() {
+
         super.onDestroy();
     }
+
+    private BroadcastReceiver receiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals(SocketService.SOCKET_CONNECTION_SUCCESS_ACTION)) {
+                String message = intent.getStringExtra(SocketService.CONNECTION_STATUS);
+                showMessage(message);
+                Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
+            }
+
+            if (intent.getAction().equals(SocketService.SOCKET_MESSAGE_FROM_SERVER_ACTION)) {
+                String message = intent.getStringExtra(SocketService.SERVER_SAID);
+                //showMessage(message);
+                Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
+            }
+
+            if (intent.getAction().equals(SocketService.SOCKET_CONNECTION_ERROR_ACTION)) {
+                String message = intent.getStringExtra(SocketService.CONNECTION_STATUS);
+                showMessage(message);
+                Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
+            }
+        }
+    };
 }
