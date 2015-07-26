@@ -88,6 +88,7 @@ public class MainActivity extends Activity {//implements ConnectionCallbacks, On
 
     private void setCurrentLocation(Location location) {
         mCurrentLocation = location;
+        displayLocation();
     }
 
     public Location getCurrentLocation() {
@@ -273,7 +274,6 @@ public class MainActivity extends Activity {//implements ConnectionCallbacks, On
             if (intent.getAction().equals(LocationService.LOCATION_UPDATE_ACTION)) {
                 Location location = intent.getParcelableExtra(LocationService.LOCATION_MESSAGE);
                 setCurrentLocation(location);
-                displayLocation();
                 //Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
             }
 

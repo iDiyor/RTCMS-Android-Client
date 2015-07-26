@@ -55,8 +55,6 @@ public class LocationService extends Service implements ConnectionCallbacks, OnC
         @Override
         public void handleMessage(Message msg) {
 
-            // do work here
-
             if (mGoogleApiClient.isConnected() && mRequestingLocationUpdates) {
                 startLocationUpdates();
             }
@@ -72,11 +70,11 @@ public class LocationService extends Service implements ConnectionCallbacks, OnC
     public void onCreate() {
         super.onCreate();
 
+        // IMPORTANT VARIABLE
         mRequestingLocationUpdates = true;
 
         if (checkPlayServices()) {
             buildGoogleApiClient();
-            //createLocationRequest();
         }
 
         if (mGoogleApiClient != null) {
@@ -110,7 +108,7 @@ public class LocationService extends Service implements ConnectionCallbacks, OnC
         mGoogleApiClient.disconnect();
     }
 
-    public void broadcastLocation(String name, String action) {
+    private void broadcastLocation(String name, String action) {
         Intent i = new Intent(action);
         i.putExtra(name, getCurrentLocation());
         LocalBroadcastManager.getInstance(this).sendBroadcast(i);
@@ -142,6 +140,8 @@ public class LocationService extends Service implements ConnectionCallbacks, OnC
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
         Log.d(TAG, "Connection Failed");
+        stopLocationUpdates();
+        stopSelf();
     }
 
 

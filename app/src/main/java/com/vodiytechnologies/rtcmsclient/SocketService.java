@@ -1,7 +1,11 @@
 package com.vodiytechnologies.rtcmsclient;
 
 import android.app.Service;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.location.Location;
 import android.os.HandlerThread;
 import android.os.IBinder;
 
@@ -44,6 +48,8 @@ public class SocketService extends Service {
     public static final String CONNECTION_STATUS = "CONNECTION_STATUS";
     public static final String SERVER_SAID = "SERVER_SAID";
 
+    private boolean IS_SERVICE_RUNNING = false;
+
     private Socket mSocket;
 
     // Handler that receives messages from the thread
@@ -55,12 +61,13 @@ public class SocketService extends Service {
         @Override
         public void handleMessage(Message msg) {
             // do work here
-
-            mSocket.on(Socket.EVENT_CONNECT, onConnectToServer);
-            mSocket.on(Socket.EVENT_CONNECT_ERROR, onConnectError);
-            mSocket.on(MOBILE_ON_MESSAGE_FROM_SERVER, onMessageFromServer);
-
-
+            if (!IS_SERVICE_RUNNING) {
+                mSocket.on(Socket.EVENT_CONNECT, onConnectToServer);
+                mSocket.on(Socket.EVENT_CONNECT_ERROR, onConnectError);
+                mSocket.on(MOBILE_ON_MESSAGE_FROM_SERVER, onMessageFromServer);
+                mSocket.connect();
+                IS_SERVICE_RUNNING = true;
+            }
             //stopSelf(msg.arg1);
         }
     }
@@ -83,7 +90,14 @@ public class SocketService extends Service {
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
-        mSocket.connect();
+        //mSocket.connect();
+
+        /**
+         * LOCATION SERVICE BROADCAST REGISTER
+         */
+        IntentFilter locationUpdateIntentFilter = new IntentFilter(LocationService.LOCATION_UPDATE_ACTION);
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(socketBroadcastReceiver, locationUpdateIntentFilter);
 
         // Start up the thread running the service.  Note that we create a
         // separate thread because the service normally runs in the process's
@@ -95,7 +109,6 @@ public class SocketService extends Service {
         // Get the HandlerThread's Looper and use it for our Handler
         mServiceLooper = thread.getLooper();
         mServiceHandler = new ServiceHandler(mServiceLooper);
-
     }
 
     @Override
@@ -107,7 +120,6 @@ public class SocketService extends Service {
         msg.arg1 = startId;
         mServiceHandler.sendMessage(msg);
 
-
         return START_STICKY;
     }
 
@@ -115,7 +127,7 @@ public class SocketService extends Service {
     private Emitter.Listener onConnectError = new Emitter.Listener() {
         @Override
         public void call(Object... args) {
-            sendIntentWithMessageWithAction(CONNECTION_STATUS,"Socket.io connection error!!!", SOCKET_CONNECTION_ERROR_ACTION);
+            broadcastIntentWithMessageWithAction(CONNECTION_STATUS,"Socket.io connection error!!!", SOCKET_CONNECTION_ERROR_ACTION);
             Log.d("socket.io", "connection error");
         }
     };
@@ -123,55 +135,100 @@ public class SocketService extends Service {
     private Emitter.Listener onConnectToServer = new Emitter.Listener() {
         @Override
         public void call(Object... args) {
-            JSONObject data = new JSONObject();
+            JSONObject data;
             try {
+                data = new JSONObject();
                 data.put("type", "mobile");
                 data.put("name", "android");
             } catch (JSONException e) {
                 return;
             }
-            mSocket.emit(MOBILE_CLIENT_CONNECTION_EMIT, data);
-            sendIntentWithMessageWithAction(CONNECTION_STATUS, "Socket.io connection success!!!", SOCKET_CONNECTION_SUCCESS_ACTION);
+            emit(MOBILE_CLIENT_CONNECTION_EMIT, data);
+            broadcastIntentWithMessageWithAction(CONNECTION_STATUS, "Socket.io connection success!!!", SOCKET_CONNECTION_SUCCESS_ACTION);
         }
     };
 
     private Emitter.Listener onMessageFromServer = new Emitter.Listener() {
         @Override
         public void call(Object... args) {
-            JSONObject data = (JSONObject) args[0];
+            JSONObject data;
             String message;
             try {
+                data = (JSONObject) args[0];
                 message = data.getString("status");
             } catch (JSONException e) {
                 return;
             }
-            sendIntentWithMessageWithAction(SERVER_SAID, message, SOCKET_MESSAGE_FROM_SERVER_ACTION);
+            broadcastIntentWithMessageWithAction(SERVER_SAID, message, SOCKET_MESSAGE_FROM_SERVER_ACTION);
         }
     };
 
-    public void sendIntentWithMessageWithAction(String name, String content, String action) {
+    private void broadcastIntentWithMessageWithAction(String name, String content, String action) {
         Intent i = new Intent(action);
         i.putExtra(name, content);
         LocalBroadcastManager.getInstance(this).sendBroadcast(i);
+    }
+
+    private void emit(String event, JSONObject object) {
+        if (mSocket.connected()) {
+            mSocket.emit(event, object);
+        }
+    }
+
+    private JSONObject getLocationJSONObject(Location location) {
+        JSONObject data;
+        try {
+            data = new JSONObject();
+            data.put("longitude", location.getLongitude());
+            data.put("latitude", location.getLatitude());
+            data.put("accuracy", location.getAccuracy());
+            data.put("bearing", location.getBearing());
+            data.put("speed", location.getSpeed());
+            data.put("time", location.getTime());
+        } catch (JSONException e) {
+            return null;
+        }
+        return data;
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
 
-        JSONObject data = new JSONObject();
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(socketBroadcastReceiver);
+
+        JSONObject data;
         try {
+            data = new JSONObject();
             data.put("type", "mobile");
             data.put("name", "android");
         } catch (JSONException e) {
             return;
         }
-        mSocket.emit(MOBILE_CLIENT_DISCONNECTION_EMIT, data);
+        emit(MOBILE_CLIENT_DISCONNECTION_EMIT, data);
 
         mSocket.off(Socket.EVENT_CONNECT, onConnectToServer);
         mSocket.off(Socket.EVENT_CONNECT_ERROR, onConnectError);
         mSocket.off(MOBILE_ON_MESSAGE_FROM_SERVER, onMessageFromServer);
         mSocket.disconnect();
         mSocket = null;
+
+        IS_SERVICE_RUNNING = false;
     }
+
+    private BroadcastReceiver socketBroadcastReceiver = new BroadcastReceiver() {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            /****************************
+             * LOCATION SERVICE BROADCAST
+             ****************************/
+            if (intent.getAction().equals(LocationService.LOCATION_UPDATE_ACTION)) {
+                Location location = intent.getParcelableExtra(LocationService.LOCATION_MESSAGE);
+
+                JSONObject locationJSONData = getLocationJSONObject(location);
+                emit(MOBILE_LOCATION_EMIT, locationJSONData);
+            }
+        }
+    };
 }
