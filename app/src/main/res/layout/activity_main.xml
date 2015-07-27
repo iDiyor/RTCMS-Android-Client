@@ -6,8 +6,8 @@
     android:orientation="vertical"
     tools:context=".MainActivity">
 
-    <TextView android:text="@string/hello_world"
-
+    <TextView
+        android:id="@+id/userTextViewId"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
     <TextView

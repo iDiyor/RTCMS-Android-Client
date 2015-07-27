@@ -11,11 +11,11 @@
         android:text="Login Activity"/>
 
     <EditText
-        android:id="@+id/usernameTextViewId"
+        android:id="@+id/usernameEditTextId"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
     <EditText
-        android:id="@+id/passwordTextViewId"
+        android:id="@+id/passwordEditTextId"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
     <Button
@@ -23,5 +23,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Sign In"/>
+    <TextView
+        android:id="@+id/responseTextViewId"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
 
 </LinearLayout>
