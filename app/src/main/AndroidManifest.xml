@@ -28,6 +28,15 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+        <!--MAIN ACTIVITY-->
+        <activity
+            android:name=".CommandCentreActivity"
+            android:label="@string/app_name" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
 
         <!--SOCKET SERVICE-->
         <service android:name=".SocketService"/>

@@ -53,7 +53,7 @@ public class MainActivity extends Activity {//implements ConnectionCallbacks, On
 //
 //        }
 
-        Button startServiceButton = (Button) findViewById(R.id.startServiceButtonId);
+        final Button startServiceButton = (Button) findViewById(R.id.startServiceButtonId);
         startServiceButton.setOnClickListener(new View.OnClickListener() {
               @Override
               public void onClick(View v) {
@@ -77,6 +77,15 @@ public class MainActivity extends Activity {//implements ConnectionCallbacks, On
                 Intent locationIntent = new Intent(MainActivity.this, LocationService.class);
                 stopService(locationIntent);
                 setCurrentLocation(null);
+            }
+        });
+
+        Button commandCentreButton = (Button) findViewById(R.id.commandCentreButtonId);
+        commandCentreButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, CommandCentreActivity.class);
+                startActivity(intent);
             }
         });
     }
@@ -198,6 +207,12 @@ public class MainActivity extends Activity {//implements ConnectionCallbacks, On
 //        if (mGoogleApiClient.isConnected() && mRequestingLocationUpdates) {
 //            startLocationUpdates();
 //        }
+//        // Starting socket service
+//        Intent socketIntent = new Intent(MainActivity.this, SocketService.class);
+//        startService(socketIntent);
+//        // Starting location service
+//        Intent locationIntent = new Intent(MainActivity.this, LocationService.class);
+//        startService(locationIntent);
 
         /**
          * SOCKET SERVICE BROADCAST REGISTER
@@ -222,6 +237,13 @@ public class MainActivity extends Activity {//implements ConnectionCallbacks, On
     protected void onPause() {
         super.onPause();
 //        stopLocationUpdates();
+
+//        // Destroying socket service
+//        Intent socketIntent = new Intent(MainActivity.this, SocketService.class);
+//        stopService(socketIntent);
+//        // Destroying location service
+//        Intent locationIntent = new Intent(MainActivity.this, LocationService.class);
+//        stopService(locationIntent);
 
         // unregister receiver
         LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver);
