@@ -51,6 +51,12 @@ public class MainActivity extends Activity {//implements ConnectionCallbacks, On
         mLatitudeTextView = (TextView) findViewById(R.id.latitudeId);
         mMessageTextView = (TextView) findViewById(R.id.messageId);
 
+        TextView userTextVew = (TextView) findViewById(R.id.userTextViewId);
+
+        String user = getIntent().getStringExtra("user");
+        userTextVew.setText("User: " + user);
+
+
         //mRequestingLocationUpdates = true;
 
 //        if (checkPlayServices()) {
