@@ -33,6 +33,8 @@ public class SocketService extends Service {
     private Looper mServiceLooper;
     private ServiceHandler mServiceHandler;
 
+    private static final String TAG = "SocketService:Message";
+
     // BROADCAST ACTIONS
     public static final String SOCKET_CONNECTION_ERROR_ACTION = "SOCKET_CONNECTION_ERROR";
     public static final String SOCKET_CONNECTION_SUCCESS_ACTION = "SOCKET_CONNECTION_SUCCESS";
@@ -52,6 +54,10 @@ public class SocketService extends Service {
 
     private Socket mSocket;
     private String mUser;
+
+    private JSONObject mObjectMissed = null;
+    private String mEventMissed;
+    private boolean mIsObjectMissed = false;
 
     // Handler that receives messages from the thread
     private final class ServiceHandler extends Handler {
@@ -147,6 +153,7 @@ public class SocketService extends Service {
                 return;
             }
             emit(MOBILE_CLIENT_CONNECTION_EMIT, data);
+            Log.d(TAG, "Connection emit");
             broadcastIntentWithMessageWithAction(CONNECTION_STATUS, "Socket.io connection success!!!", SOCKET_CONNECTION_SUCCESS_ACTION);
         }
     };
@@ -175,6 +182,23 @@ public class SocketService extends Service {
     private void emit(String event, JSONObject object) {
         if (mSocket.connected()) {
             mSocket.emit(event, object);
+
+            /** Fix for location emit
+             * (Because sometimes location emits first before socket connection)
+             */
+            if (mIsObjectMissed) {
+                mSocket.emit(mEventMissed, mObjectMissed);
+
+                mIsObjectMissed = false;
+                mEventMissed = null;
+                mObjectMissed = null;
+            }
+        } else {
+            Log.d(TAG, "Socket is not connected");
+            Log.d(TAG, "An object miss");
+            mIsObjectMissed = true;
+            mEventMissed = event;
+            mObjectMissed = object;
         }
     }
 
@@ -232,6 +256,7 @@ public class SocketService extends Service {
 
                 JSONObject locationJSONData = getLocationJSONObject(location);
                 emit(MOBILE_LOCATION_EMIT, locationJSONData);
+                Log.d(TAG, "Location emit");
             }
         }
     };

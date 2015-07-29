@@ -57,10 +57,11 @@ public class MainActivity extends Activity {//implements ConnectionCallbacks, On
         startServiceButton.setOnClickListener(new View.OnClickListener() {
               @Override
               public void onClick(View v) {
+                  // Socket service
                   Intent socketIntent = new Intent(MainActivity.this, SocketService.class);
                   socketIntent.putExtra("user", user);
                   startService(socketIntent);
-
+                  // Location service
                   Intent locationIntent = new Intent(MainActivity.this, LocationService.class);
                   startService(locationIntent);
 
@@ -71,13 +72,16 @@ public class MainActivity extends Activity {//implements ConnectionCallbacks, On
         stopServiceButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                // Location service
+                Intent locationIntent = new Intent(MainActivity.this, LocationService.class);
+                stopService(locationIntent);
+                setCurrentLocation(null);
+                // Socket service
                 Intent intent = new Intent(MainActivity.this, SocketService.class);
                 stopService(intent);
                 showMessage("Socket connection disconnected");
 
-                Intent locationIntent = new Intent(MainActivity.this, LocationService.class);
-                stopService(locationIntent);
-                setCurrentLocation(null);
+
             }
         });
 
