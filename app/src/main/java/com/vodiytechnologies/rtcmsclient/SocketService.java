@@ -51,6 +51,7 @@ public class SocketService extends Service {
     private boolean IS_SERVICE_RUNNING = false;
 
     private Socket mSocket;
+    private String mUser;
 
     // Handler that receives messages from the thread
     private final class ServiceHandler extends Handler {
@@ -120,6 +121,8 @@ public class SocketService extends Service {
         msg.arg1 = startId;
         mServiceHandler.sendMessage(msg);
 
+        mUser = intent.getStringExtra("user");
+
         return START_STICKY;
     }
 
@@ -139,7 +142,7 @@ public class SocketService extends Service {
             try {
                 data = new JSONObject();
                 data.put("type", "mobile");
-                data.put("name", "android");
+                data.put("user", mUser);
             } catch (JSONException e) {
                 return;
             }
@@ -179,6 +182,7 @@ public class SocketService extends Service {
         JSONObject data;
         try {
             data = new JSONObject();
+            data.put("user", mUser);
             data.put("longitude", location.getLongitude());
             data.put("latitude", location.getLatitude());
             data.put("accuracy", location.getAccuracy());
@@ -201,7 +205,7 @@ public class SocketService extends Service {
         try {
             data = new JSONObject();
             data.put("type", "mobile");
-            data.put("name", "android");
+            data.put("user", mUser);
         } catch (JSONException e) {
             return;
         }
