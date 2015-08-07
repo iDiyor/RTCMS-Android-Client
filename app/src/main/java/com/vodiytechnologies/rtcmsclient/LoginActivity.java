@@ -27,7 +27,7 @@ public class LoginActivity extends Activity {
     private EditText mUsernameTextView;
     private EditText mPasswordTextView;
 
-    private final String url = "http://52.28.143.209:3000/api/access/authenticate";
+    private final String authUrl = "http://52.28.143.209:3000/api/access/authenticate";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -62,7 +62,7 @@ public class LoginActivity extends Activity {
                 }
                 // json request
                 if (params != null) {
-                    JsonObjectRequest jsonReq = new JsonObjectRequest(Request.Method.POST, url, params, new Response.Listener<JSONObject>() {
+                    JsonObjectRequest jsonReq = new JsonObjectRequest(Request.Method.POST, authUrl, params, new Response.Listener<JSONObject>() {
                         @Override
                         public void onResponse(JSONObject jsonObject) {
 
