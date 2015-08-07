@@ -5,4 +5,37 @@
         <!-- Customize your theme here. -->
     </style>
 
+        <!-- LIGHT THEME -->
+    <!-- LAYOUT BACKGROUND -->
+    <style name="mainLayoutStyleLight">
+        <item name="android:background">@color/main_layout_background_color</item>
+    </style>
+    <!-- MAIN ACTION BUTTONS : DAY-->
+    <style name="buttonStyleLight">
+        <item name="android:background">@drawable/button_background</item>
+        <item name="android:textColor">@color/button_text_color</item>
+    </style>
+    <!-- EMERGENCY BUTTON : DAY-->
+    <style name="emergencyButtonStyleLight">
+        <item name="android:background">@drawable/button_emergency_background</item>
+        <item name="android:textColor">@color/button_text_color</item>
+    </style>
+    
+    
+    <!-- DARK THEME -->
+    <!-- LAYOUT BACKGROUND -->
+    <style name="mainLayoutStyleDark">
+        <item name="android:background">@color/main_layout_background_color_dark</item>
+    </style>
+     <!-- MAIN ACTION BUTTONS : NIGHT-->
+    <style name="buttonStyleDark">
+        <item name="android:background">@drawable/button_background_dark</item>
+        <item name="android:textColor">@color/button_text_color_dark</item>
+    </style>
+    <!-- EMERGENCY BUTTON : DAY-->
+    <style name="emergencyButtonStyleDark">
+        <item name="android:background">@drawable/button_emergency_background_dark</item>
+        <item name="android:textColor">@color/button_text_color_dark</item>
+    </style>
+
 </resources>

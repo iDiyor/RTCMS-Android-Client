@@ -2,4 +2,37 @@
 <resources>
     <color name="login_activity_background">#ecf0f1</color>
     <color name="signin_button_background">#27ae60</color>
+
+        <!-- LIGHT THEME COLORS -->
+    <color name="button_text_color">#555555</color>
+    <color name="button_background_color">#B0BEC5</color>
+    <color name="button_pressed_background_color">#78909C</color>
+    
+    <!-- EMERGENCY BUTTON -->
+    <color name="emergency_button_background_color">#FF7043</color>
+    <color name="emergency_button_pressed_background_color">#F4511E</color>
+    
+    <!-- MAIN ACTIVITY LAYOUT BG -->
+    <color name="main_layout_background_color">#CFD8DC</color>
+    
+    <!-- DIALOG TITLE COLOR -->
+    <color name="dialog_title_color">#555555</color>
+    <color name="dialog_divider_color">#D3D3D3</color>
+    
+    <!-- SETTINGS COLOR -->
+    <color name="settings_name_text_color">#555555</color>
+    <color name="settings_value_text_color">#757575</color>
+    
+    <!-- ############################################### -->
+    <!-- DARK THEME COLORS -->
+    <color name="button_text_color_dark">#EEEEEE</color>
+    <color name="button_background_color_dark">#212121</color>
+    <color name="button_pressed_background_color_dark">#424242</color>
+    
+    <!-- EMERGENCY BUTTON -->
+    <color name="emergency_button_background_color_dark">#BF360C</color>
+    <color name="emergency_button_pressed_background_color_dark">#F4511E</color>
+    
+    <!-- MAIN ACTIVITY LAYOUT BG -->
+    <color name="main_layout_background_color_dark">#616161</color>
 </resources>
