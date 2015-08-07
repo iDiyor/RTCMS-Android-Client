@@ -11,7 +11,7 @@
    	</declare-styleable>   	
    	
    	<!-- THEME ATTRS -->
-   	<attr name="actionButtonStyle" format="reference"></attr>
+   	<attr name="taskButtonStyle" format="reference"></attr>
    	<attr name="layoutBackgroundStyle" format="reference"></attr>
    	<attr name="emergencyButtonStyle" format="reference"></attr>
 </resources>

@@ -27,7 +27,7 @@ public class LoginActivity extends Activity {
     private EditText mUsernameTextView;
     private EditText mPasswordTextView;
 
-    private final String authUrl = "http://52.28.143.209:3000/api/access/authenticate";
+    private final String authUrl = "http://52.28.143.209:3000/api/user/authenticate";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -54,6 +54,7 @@ public class LoginActivity extends Activity {
                         params = new JSONObject();
                         params.put("username", mUsernameTextView.getText());
                         params.put("password", mPasswordTextView.getText());
+                        params.put("role", "driver");
                     } catch (JSONException e) {
                         return;
                     }
@@ -70,7 +71,7 @@ public class LoginActivity extends Activity {
                             String user;
                             try {
                                 responseStatus = jsonObject.getString("responseStatus");
-                                user = jsonObject.getJSONObject("responseBody").getString("userName");
+                                user = jsonObject.getJSONObject("responseBody").getJSONObject("userProfile").getString("first_name");
                             } catch (JSONException e) {
                                 Log.d("JSONException","JSONException while JsonResponse");
                                 return;

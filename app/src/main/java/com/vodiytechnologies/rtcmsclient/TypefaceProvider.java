@@ -1,4 +1,4 @@
-package com.idcompany.taxidriverapp;
+package com.vodiytechnologies.rtcmsclient;
 
 import java.util.Hashtable;
 

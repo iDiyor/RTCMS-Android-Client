@@ -1,5 +1,4 @@
-package com.idcompany.taxidriverapp;
-
+package com.vodiytechnologies.rtcmsclient;
 
 import android.content.Context;
 import android.content.res.TypedArray;
