@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="TypefacedEditText">
+		<attr name="fontNameForEditText" format="string"></attr>
+   	</declare-styleable>
+   	<declare-styleable name="TypefacedButton">
+   	    <attr name="fontNameForButton" format="string"></attr>
+   	</declare-styleable>
+   	<declare-styleable name="TypefacedTextView">
+   	    <attr name="fontNameForTextView" format="string"></attr>
+   	</declare-styleable>   	
+   	
+   	<!-- THEME ATTRS -->
+   	<attr name="taskButtonStyle" format="reference"></attr>
+   	<attr name="layoutBackgroundStyle" format="reference"></attr>
+   	<attr name="emergencyButtonStyle" format="reference"></attr>
+</resources>

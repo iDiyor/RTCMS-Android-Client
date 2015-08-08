@@ -1,5 +1,31 @@
 <resources>
-    <!-- Default screen margins, per the Android Design guidelines. -->
+
+	<dimen name="status_text_size">30sp</dimen>
+
+
+	<!-- Default screen margins, per the Android Design guidelines. -->
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
+
+	<dimen name="button_text_size">25sp</dimen>
+    <dimen name="button_text_smaller_size">22sp</dimen>
+    
+    <dimen name="button_height_size">72dp</dimen>
+    
+    <!-- SETTINGS ACTIVITY LIST TEXT SIZE -->
+   	<dimen name="setting_name_text_size">24sp</dimen>
+   	<dimen name="setting_value_text_size">14sp</dimen>
+   	
+   	<!-- SETTINGS ACTIVITY LIST : CHILD ROW SIZE -->
+   	<dimen name="setting_list_row_height">72dp</dimen>
+   	
+   	<!-- PHONE NUMBER CHANGE DIALOG TEXT SIZES -->
+   	<dimen name="dialog_input_textview_text_size">16sp</dimen>
+   	<dimen name="dialog_input_edittext_text_size">26sp</dimen>
+   	<dimen name="dialog_button_text_size">20sp</dimen>
+   	
+   	<!-- PASSWORD DIALOG -->
+   	<dimen name="password_dialog_textview_text_size">18sp</dimen>
+   	<dimen name="password_dialog_edittext_text_size">26sp</dimen>
+   	<dimen name="password_dialog_button_text_size">20sp</dimen>
 </resources>
