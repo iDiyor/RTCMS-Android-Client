@@ -9,11 +9,21 @@
 
     <LinearLayout
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="fill_parent"
         android:orientation="vertical">
+        <com.vodiytechnologies.rtcmsclient.TypefacedTextView
+            android:id="@+id/currentStatusTextViewId"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/button_height_size"
+            android:gravity="center"
+            IDLib:fontNameForButton="@string/Roboto_Bold"
+            android:textSize="@dimen/status_text_size"
+            android:background="@color/status_backgroud_color"
+            android:text="No Job"/>
         <LinearLayout
             android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="fill_parent"
+            android:layout_marginTop="5dp"
             android:orientation="horizontal">
             <!-- COLUNM #1 -->
             <LinearLayout
@@ -202,8 +212,7 @@
             android:textSize="@dimen/button_text_size"
             android:gravity="center"
             IDLib:fontNameForButton="@string/Roboto_Bold"
-            style="?emergencyButtonStyle"
-            android:onClick="onButtonClick"/>
+            style="?emergencyButtonStyle"/>
     </LinearLayout>
 
 </ScrollView >

@@ -43,12 +43,15 @@ public class SocketService extends Service {
     private static final String MOBILE_CLIENT_CONNECTION_EMIT = "client:connection";
     private static final String MOBILE_CLIENT_DISCONNECTION_EMIT = "client:disconnection";
     private static final String MOBILE_ON_MESSAGE_FROM_SERVER = "server:message";
+    private static final String MOBILE_CLIENT_STATUS_EMIT = "client:status";
 
     // MESSAGE NAME
     public static final String CONNECTION_STATUS = "CONNECTION_STATUS";
     public static final String SERVER_SAID = "SERVER_SAID";
 
     private boolean IS_SERVICE_RUNNING = false;
+
+    private String mClient;
 
     private Socket mSocket;
 
@@ -96,8 +99,12 @@ public class SocketService extends Service {
          * LOCATION SERVICE BROADCAST REGISTER
          */
         IntentFilter locationUpdateIntentFilter = new IntentFilter(LocationService.LOCATION_UPDATE_ACTION);
-
         LocalBroadcastManager.getInstance(this).registerReceiver(socketBroadcastReceiver, locationUpdateIntentFilter);
+        /**
+         * CONTROL CENTRE BROADCAST REGISTER
+         */
+        IntentFilter statusUpdateIntentFilter = new IntentFilter(CommandCentreActivity.CURRENT_STATUS_UPDATE_ACTION);
+        LocalBroadcastManager.getInstance(this).registerReceiver(socketBroadcastReceiver,statusUpdateIntentFilter);
 
         // Start up the thread running the service.  Note that we create a
         // separate thread because the service normally runs in the process's
@@ -114,6 +121,9 @@ public class SocketService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         super.onStartCommand(intent, flags, startId);
+
+        mClient = intent.getStringExtra("client");
+
         // For each start request, send a message to start a job and deliver the
         // start ID so we know which request we're stopping when we finish the job
         Message msg = mServiceHandler.obtainMessage();
@@ -139,11 +149,12 @@ public class SocketService extends Service {
             try {
                 data = new JSONObject();
                 data.put("type", "mobile");
-                data.put("name", "android");
+                data.put("client", mClient);
             } catch (JSONException e) {
                 return;
             }
             emit(MOBILE_CLIENT_CONNECTION_EMIT, data);
+            Log.d("SOCKET", "CONNECTION EMIT");
             broadcastIntentWithMessageWithAction(CONNECTION_STATUS, "Socket.io connection success!!!", SOCKET_CONNECTION_SUCCESS_ACTION);
         }
     };
@@ -175,6 +186,16 @@ public class SocketService extends Service {
         }
     }
 
+    private JSONObject getJSONObject(String key, String value) {
+        JSONObject data;
+        try {
+            data = new JSONObject();
+            data.put(key, value);
+        } catch (JSONException e) {
+            return null;
+        }
+        return data;
+    }
     private JSONObject getLocationJSONObject(Location location) {
         JSONObject data;
         try {
@@ -228,6 +249,17 @@ public class SocketService extends Service {
 
                 JSONObject locationJSONData = getLocationJSONObject(location);
                 emit(MOBILE_LOCATION_EMIT, locationJSONData);
+                Log.d("SOCKET", "LOCATION EMIT");
+            }
+
+            /****************************
+             * COMMAND CENTRE BROADCAST
+             ****************************/
+            if (intent.getAction().equals(CommandCentreActivity.CURRENT_STATUS_UPDATE_ACTION)) {
+                String status = intent.getStringExtra(CommandCentreActivity.CURRENT_STATUS);
+
+                JSONObject statusJSONData = getJSONObject("status", status);
+                emit(MOBILE_CLIENT_STATUS_EMIT, statusJSONData);
             }
         }
     };

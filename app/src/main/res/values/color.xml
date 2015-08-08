@@ -3,6 +3,9 @@
     <color name="login_activity_background">#ecf0f1</color>
     <color name="signin_button_background">#27ae60</color>
 
+    <!--STATUS TEXT VIEW BACKGROUD-->
+    <color name="status_backgroud_color">#66BB6A</color>
+
         <!-- LIGHT THEME COLORS -->
     <color name="button_text_color">#555555</color>
     <color name="button_background_color">#B0BEC5</color>
@@ -13,7 +16,7 @@
     <color name="emergency_button_pressed_background_color">#F4511E</color>
     
     <!-- MAIN ACTIVITY LAYOUT BG -->
-    <color name="main_layout_background_color">#CFD8DC</color>
+    <color name="main_layout_background_color">#FFFFFF</color>
     
     <!-- DIALOG TITLE COLOR -->
     <color name="dialog_title_color">#555555</color>

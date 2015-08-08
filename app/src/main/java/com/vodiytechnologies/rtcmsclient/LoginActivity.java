@@ -68,17 +68,19 @@ public class LoginActivity extends Activity {
                         public void onResponse(JSONObject jsonObject) {
 
                             String responseStatus;
-                            String user;
+                            String clientName;
                             try {
                                 responseStatus = jsonObject.getString("responseStatus");
-                                user = jsonObject.getJSONObject("responseBody").getJSONObject("userProfile").getString("first_name");
+                                String firstName = jsonObject.getJSONObject("responseBody").getJSONObject("userProfile").getString("first_name");
+                                String lastName = jsonObject.getJSONObject("responseBody").getJSONObject("userProfile").getString("last_name");
+                                clientName = firstName + " " + lastName;
                             } catch (JSONException e) {
                                 Log.d("JSONException","JSONException while JsonResponse");
                                 return;
                             }
                             Toast.makeText(getApplicationContext(), responseStatus, Toast.LENGTH_SHORT).show();
                             responseTextView.setText(jsonObject.toString());
-                            signIn(user);
+                            signIn(clientName);
                         }
                     }, new Response.ErrorListener() {
                         @Override
@@ -94,11 +96,11 @@ public class LoginActivity extends Activity {
         });
     }
 
-    private void signIn(String user) {
+    private void signIn(String clientName) {
         Intent intent = new Intent(this, MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        intent.putExtra("user", user);
+        intent.putExtra("client", clientName);
         startActivity(intent);
         finish();
     }
