@@ -42,11 +42,9 @@ public class MainActivity extends Activity {//implements ConnectionCallbacks, On
 
         TextView userTextVew = (TextView) findViewById(R.id.userTextViewId);
 
-<<<<<<< HEAD
+
         final String user = getIntent().getStringExtra("client");
-=======
-        final String user = getIntent().getStringExtra("user");
->>>>>>> master
+
         userTextVew.setText("User: " + user);
 
 
@@ -63,11 +61,8 @@ public class MainActivity extends Activity {//implements ConnectionCallbacks, On
               public void onClick(View v) {
                   // Socket service
                   Intent socketIntent = new Intent(MainActivity.this, SocketService.class);
-<<<<<<< HEAD
                   socketIntent.putExtra("client", user);
-=======
-                  socketIntent.putExtra("user", user);
->>>>>>> master
+
                   startService(socketIntent);
                   // Location service
                   Intent locationIntent = new Intent(MainActivity.this, LocationService.class);
