@@ -33,6 +33,8 @@ public class SocketService extends Service {
     private Looper mServiceLooper;
     private ServiceHandler mServiceHandler;
 
+    private static final String TAG = "SocketService:Message";
+
     // BROADCAST ACTIONS
     public static final String SOCKET_CONNECTION_ERROR_ACTION = "SOCKET_CONNECTION_ERROR";
     public static final String SOCKET_CONNECTION_SUCCESS_ACTION = "SOCKET_CONNECTION_SUCCESS";
@@ -54,6 +56,11 @@ public class SocketService extends Service {
     private String mClient;
 
     private Socket mSocket;
+    private String mUser;
+
+    private JSONObject mObjectMissed = null;
+    private String mEventMissed;
+    private boolean mIsObjectMissed = false;
 
     // Handler that receives messages from the thread
     private final class ServiceHandler extends Handler {
@@ -130,6 +137,8 @@ public class SocketService extends Service {
         msg.arg1 = startId;
         mServiceHandler.sendMessage(msg);
 
+        mUser = intent.getStringExtra("user");
+
         return START_STICKY;
     }
 
@@ -149,12 +158,20 @@ public class SocketService extends Service {
             try {
                 data = new JSONObject();
                 data.put("type", "mobile");
+<<<<<<< HEAD
                 data.put("client", mClient);
+=======
+                data.put("user", mUser);
+>>>>>>> master
             } catch (JSONException e) {
                 return;
             }
             emit(MOBILE_CLIENT_CONNECTION_EMIT, data);
+<<<<<<< HEAD
             Log.d("SOCKET", "CONNECTION EMIT");
+=======
+            Log.d(TAG, "Connection emit");
+>>>>>>> master
             broadcastIntentWithMessageWithAction(CONNECTION_STATUS, "Socket.io connection success!!!", SOCKET_CONNECTION_SUCCESS_ACTION);
         }
     };
@@ -183,6 +200,23 @@ public class SocketService extends Service {
     private void emit(String event, JSONObject object) {
         if (mSocket.connected()) {
             mSocket.emit(event, object);
+
+            /** Fix for location emit
+             * (Because sometimes location emits first before socket connection)
+             */
+            if (mIsObjectMissed) {
+                mSocket.emit(mEventMissed, mObjectMissed);
+
+                mIsObjectMissed = false;
+                mEventMissed = null;
+                mObjectMissed = null;
+            }
+        } else {
+            Log.d(TAG, "Socket is not connected");
+            Log.d(TAG, "An object miss");
+            mIsObjectMissed = true;
+            mEventMissed = event;
+            mObjectMissed = object;
         }
     }
 
@@ -200,6 +234,7 @@ public class SocketService extends Service {
         JSONObject data;
         try {
             data = new JSONObject();
+            data.put("user", mUser);
             data.put("longitude", location.getLongitude());
             data.put("latitude", location.getLatitude());
             data.put("accuracy", location.getAccuracy());
@@ -222,7 +257,7 @@ public class SocketService extends Service {
         try {
             data = new JSONObject();
             data.put("type", "mobile");
-            data.put("name", "android");
+            data.put("user", mUser);
         } catch (JSONException e) {
             return;
         }
@@ -249,6 +284,7 @@ public class SocketService extends Service {
 
                 JSONObject locationJSONData = getLocationJSONObject(location);
                 emit(MOBILE_LOCATION_EMIT, locationJSONData);
+<<<<<<< HEAD
                 Log.d("SOCKET", "LOCATION EMIT");
             }
 
@@ -260,6 +296,9 @@ public class SocketService extends Service {
 
                 JSONObject statusJSONData = getJSONObject("status", status);
                 emit(MOBILE_CLIENT_STATUS_EMIT, statusJSONData);
+=======
+                Log.d(TAG, "Location emit");
+>>>>>>> master
             }
         }
     };
