@@ -42,10 +42,11 @@ public class SocketService extends Service {
 
     // SOCKET EVENTS
     private static final String MOBILE_LOCATION_EMIT = "mobile:location";
+    private static final String MOBILE_CLIENT_STATUS_EMIT = "mobile:client:status";
     private static final String MOBILE_CLIENT_CONNECTION_EMIT = "client:connection";
-    private static final String MOBILE_CLIENT_DISCONNECTION_EMIT = "client:disconnection";
+    private static final String MOBILE_CLIENT_DISCONNECTION_EMIT = "client:disconnect";
     private static final String MOBILE_ON_MESSAGE_FROM_SERVER = "server:message";
-    private static final String MOBILE_CLIENT_STATUS_EMIT = "client:status";
+
 
     // MESSAGE NAME
     public static final String CONNECTION_STATUS = "CONNECTION_STATUS";
@@ -163,7 +164,8 @@ public class SocketService extends Service {
                 data.put("type", "mobile");
                 data.put("clientId", mClientId);
                 data.put("client", mClient);
-                data.put("last_known_position", getLocationJSONObject(mLastKnownLocation));
+                data.put("clientStatus", "No Job");
+                data.put("lastKnowLocation", getLocationJSONObject(mLastKnownLocation));
 
             } catch (JSONException e) {
                 return;
@@ -233,17 +235,48 @@ public class SocketService extends Service {
         return data;
     }
     private JSONObject getLocationJSONObject(Location location) {
+        if (location != null) {
+            JSONObject data;
+            try {
+                data = new JSONObject();
+                data.put("clientId", mClientId);
+                data.put("client", mClient);
+                data.put("longitude", location.getLongitude());
+                data.put("latitude", location.getLatitude());
+                data.put("accuracy", location.getAccuracy());
+                data.put("bearing", location.getBearing());
+                data.put("speed", location.getSpeed());
+                data.put("time", location.getTime());
+            } catch (JSONException e) {
+                return null;
+            }
+            return data;
+        } else {
+            JSONObject data;
+            try {
+                data = new JSONObject();
+                data.put("clientId", mClientId);
+                data.put("client", mClient);
+                data.put("longitude", 0);
+                data.put("latitude", 0);
+                data.put("accuracy", 0);
+                data.put("bearing", 0);
+                data.put("speed", 0);
+                data.put("time", 0);
+            } catch (JSONException e) {
+                return null;
+            }
+            return data;
+        }
+    }
+
+    private JSONObject createClientStatusJSONObject(String status) {
         JSONObject data;
         try {
             data = new JSONObject();
             data.put("clientId", mClientId);
             data.put("client", mClient);
-            data.put("longitude", location.getLongitude());
-            data.put("latitude", location.getLatitude());
-            data.put("accuracy", location.getAccuracy());
-            data.put("bearing", location.getBearing());
-            data.put("speed", location.getSpeed());
-            data.put("time", location.getTime());
+            data.put("clientStatus", status);
         } catch (JSONException e) {
             return null;
         }
@@ -299,10 +332,9 @@ public class SocketService extends Service {
             if (intent.getAction().equals(CommandCentreActivity.CURRENT_STATUS_UPDATE_ACTION)) {
                 String status = intent.getStringExtra(CommandCentreActivity.CURRENT_STATUS);
 
-                JSONObject statusJSONData = getJSONObject("status", status);
+                JSONObject statusJSONData = createClientStatusJSONObject(status);
                 emit(MOBILE_CLIENT_STATUS_EMIT, statusJSONData);
-
-                Log.d(TAG, "Location emit");
+                Log.d("SOCKET", "STATUS EMIT");
             }
         }
     };

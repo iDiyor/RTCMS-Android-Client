@@ -16,20 +16,15 @@ import android.widget.Toast;
 
 public class MainActivity extends Activity {//implements ConnectionCallbacks, OnConnectionFailedListener , LocationListener{ //SocketResultReceiver.Receiver {
 
-//    private final static int PLAY_SERVICE_RESOLUTION_REQ = 1000;
     private Location mCurrentLocation;
-//    private GoogleApiClient mGoogleApiClient;
-//    private boolean mRequestingLocationUpdates = false;
-//    private LocationRequest mLocationRequest;
-//
-//    private static int UPDATE_INTERVAL = 1000 * 10; // 10 sec
-//    private static int FASTEST_INTERVAL = 1000 * 5; // 5 sec
-//    private static int DISPLACEMENT = 5; // 5 meters
 
     // TextViews
     private TextView mLongitudeTextView;
     private TextView mLatitudeTextView;
     private TextView mMessageTextView;
+
+    private String mClient;
+    private String mClientId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,18 +37,7 @@ public class MainActivity extends Activity {//implements ConnectionCallbacks, On
 
         TextView userTextVew = (TextView) findViewById(R.id.userTextViewId);
 
-
-        final String client = getIntent().getStringExtra("client");
-        final String clientId = getIntent().getStringExtra("clientId");
-        userTextVew.setText("User ID: " + clientId + ": " + client);
-
-
-        //mRequestingLocationUpdates = true;
-
-//        if (checkPlayServices()) {
-//            buildGoogleApiClient();
-//
-//        }
+        userTextVew.setText("User ID: " + mClientId + ": " + mClient);
 
         final Button startServiceButton = (Button) findViewById(R.id.startServiceButtonId);
         startServiceButton.setOnClickListener(new View.OnClickListener() {
@@ -61,8 +45,8 @@ public class MainActivity extends Activity {//implements ConnectionCallbacks, On
               public void onClick(View v) {
                   // Socket service
                   Intent socketIntent = new Intent(MainActivity.this, SocketService.class);
-                  socketIntent.putExtra("clientId", clientId);
-                  socketIntent.putExtra("client", client);
+                  socketIntent.putExtra("clientId", mClientId);
+                  socketIntent.putExtra("client", mClient);
 
                   startService(socketIntent);
                   // Location service
@@ -127,101 +111,28 @@ public class MainActivity extends Activity {//implements ConnectionCallbacks, On
         }
     }
 
-//    /* Google Play Services */
-//    protected synchronized void buildGoogleApiClient() {
-//        mGoogleApiClient = new GoogleApiClient.Builder(this)
-//                .addConnectionCallbacks(this)
-//                .addOnConnectionFailedListener(this)
-//                .addApi(LocationServices.API).build();
-//        createLocationRequest();
-//    }
-//
-//    private boolean checkPlayServices() {
-//        int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
-//
-//        if (resultCode != ConnectionResult.SUCCESS) {
-//            if (GooglePlayServicesUtil.isUserRecoverableError(resultCode)) {
-//                GooglePlayServicesUtil.getErrorDialog(resultCode, this, PLAY_SERVICE_RESOLUTION_REQ).show();
-//            } else {
-//                Toast.makeText(getApplicationContext(), "This Device is not supported", Toast.LENGTH_LONG).show();
-//                finish();
-//            }
-//            return false;
-//        }
-//        return true;
-//    }
-//
-//    // creating location request object
-//    protected void createLocationRequest() {
-//        mLocationRequest = new LocationRequest();
-//        mLocationRequest.setInterval(UPDATE_INTERVAL);
-//        mLocationRequest.setFastestInterval(FASTEST_INTERVAL);
-//        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-//        mLocationRequest.setSmallestDisplacement(DISPLACEMENT);
-//    }
-//
-//
-//    // starting location updates
-//    protected void startLocationUpdates() {
-//        LocationServices.FusedLocationApi.requestLocationUpdates(
-//                mGoogleApiClient, mLocationRequest, this);
-//    }
-//
-//    // stop location updates
-//    protected void stopLocationUpdates() {
-//        LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
-//    }
-//
-//    @Override
-//    public void onConnected(Bundle bundle) {
-//        // display location here
-//        //displayLocation();
-//
-//        if (mRequestingLocationUpdates) {
-//            startLocationUpdates();
-//        }
-//    }
-//
-//    @Override
-//    public void onConnectionSuspended(int i) {
-//        mGoogleApiClient.connect();
-//    }
-//
-//    @Override
-//    public void onConnectionFailed(ConnectionResult connectionResult) {
-//        Log.d("message", "Connection Failed");
-//    }
-//
-//    @Override
-//    public void onLocationChanged(Location location) {
-//        // sets global myCurrentLocation
-//        setCurrentLocation(location);
-//        // displays current location
-//        displayLocation();
-//
-//    }
-
     @Override
     protected void onStart() {
         super.onStart();
-//        if (mGoogleApiClient != null) {
-//            mGoogleApiClient.connect();
-//        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
 
-//        if (mGoogleApiClient.isConnected() && mRequestingLocationUpdates) {
-//            startLocationUpdates();
-//        }
-//        // Starting socket service
-//        Intent socketIntent = new Intent(MainActivity.this, SocketService.class);
-//        startService(socketIntent);
-//        // Starting location service
-//        Intent locationIntent = new Intent(MainActivity.this, LocationService.class);
-//        startService(locationIntent);
+        mClient = getIntent().getStringExtra("client");
+        mClientId = getIntent().getStringExtra("clientId");
+
+        // Socket service
+        Intent socketIntent = new Intent(MainActivity.this, SocketService.class);
+        socketIntent.putExtra("clientId", mClientId);
+        socketIntent.putExtra("client", mClient);
+
+        startService(socketIntent);
+        // Location service
+        Intent locationIntent = new Intent(MainActivity.this, LocationService.class);
+        startService(locationIntent);
+
 
         /**
          * SOCKET SERVICE BROADCAST REGISTER
@@ -245,14 +156,15 @@ public class MainActivity extends Activity {//implements ConnectionCallbacks, On
     @Override
     protected void onPause() {
         super.onPause();
-//        stopLocationUpdates();
 
-//        // Destroying socket service
-//        Intent socketIntent = new Intent(MainActivity.this, SocketService.class);
-//        stopService(socketIntent);
-//        // Destroying location service
-//        Intent locationIntent = new Intent(MainActivity.this, LocationService.class);
-//        stopService(locationIntent);
+        // Location service
+        Intent locationIntent = new Intent(MainActivity.this, LocationService.class);
+        stopService(locationIntent);
+        setCurrentLocation(null);
+        // Socket service
+        Intent intent = new Intent(MainActivity.this, SocketService.class);
+        stopService(intent);
+        showMessage("Socket connection disconnected");
 
         // unregister receiver
         LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver);
@@ -260,7 +172,7 @@ public class MainActivity extends Activity {//implements ConnectionCallbacks, On
 
     @Override
     protected void onStop() {
-//        mGoogleApiClient.disconnect();
+
         super.onStop();
     }
 
