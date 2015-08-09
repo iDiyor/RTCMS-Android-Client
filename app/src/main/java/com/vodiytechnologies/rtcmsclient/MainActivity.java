@@ -43,9 +43,9 @@ public class MainActivity extends Activity {//implements ConnectionCallbacks, On
         TextView userTextVew = (TextView) findViewById(R.id.userTextViewId);
 
 
-        final String user = getIntent().getStringExtra("client");
-
-        userTextVew.setText("User: " + user);
+        final String client = getIntent().getStringExtra("client");
+        final String clientId = getIntent().getStringExtra("clientId");
+        userTextVew.setText("User ID: " + clientId + ": " + client);
 
 
         //mRequestingLocationUpdates = true;
@@ -61,7 +61,8 @@ public class MainActivity extends Activity {//implements ConnectionCallbacks, On
               public void onClick(View v) {
                   // Socket service
                   Intent socketIntent = new Intent(MainActivity.this, SocketService.class);
-                  socketIntent.putExtra("client", user);
+                  socketIntent.putExtra("clientId", clientId);
+                  socketIntent.putExtra("client", client);
 
                   startService(socketIntent);
                   // Location service

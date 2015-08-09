@@ -53,13 +53,16 @@ public class SocketService extends Service {
 
     private boolean IS_SERVICE_RUNNING = false;
 
-    private String mClient;
+    private String mClient; // client name == user name inside user profile table
+    private String mClientId; // client id == user id from user profile table
 
     private Socket mSocket;
 
     private JSONObject mObjectMissed = null;
     private String mEventMissed;
     private boolean mIsObjectMissed = false;
+
+    private Location mLastKnownLocation;
 
     // Handler that receives messages from the thread
     private final class ServiceHandler extends Handler {
@@ -129,6 +132,7 @@ public class SocketService extends Service {
         super.onStartCommand(intent, flags, startId);
 
         mClient = intent.getStringExtra("client");
+        mClientId = intent.getStringExtra("clientId");
 
         // For each start request, send a message to start a job and deliver the
         // start ID so we know which request we're stopping when we finish the job
@@ -157,8 +161,9 @@ public class SocketService extends Service {
             try {
                 data = new JSONObject();
                 data.put("type", "mobile");
-
+                data.put("clientId", mClientId);
                 data.put("client", mClient);
+                data.put("last_known_position", getLocationJSONObject(mLastKnownLocation));
 
             } catch (JSONException e) {
                 return;
@@ -231,6 +236,7 @@ public class SocketService extends Service {
         JSONObject data;
         try {
             data = new JSONObject();
+            data.put("clientId", mClientId);
             data.put("client", mClient);
             data.put("longitude", location.getLongitude());
             data.put("latitude", location.getLatitude());
@@ -254,7 +260,9 @@ public class SocketService extends Service {
         try {
             data = new JSONObject();
             data.put("type", "mobile");
+            data.put("clientId", mClientId);
             data.put("client", mClient);
+            //data.put("last_known_position", getLocationJSONObject(mLastKnownLocation));
         } catch (JSONException e) {
             return;
         }
@@ -265,6 +273,7 @@ public class SocketService extends Service {
         mSocket.off(MOBILE_ON_MESSAGE_FROM_SERVER, onMessageFromServer);
         mSocket.disconnect();
         mSocket = null;
+        mLastKnownLocation = null;
 
         IS_SERVICE_RUNNING = false;
     }
@@ -278,7 +287,7 @@ public class SocketService extends Service {
              ****************************/
             if (intent.getAction().equals(LocationService.LOCATION_UPDATE_ACTION)) {
                 Location location = intent.getParcelableExtra(LocationService.LOCATION_MESSAGE);
-
+                mLastKnownLocation = location;
                 JSONObject locationJSONData = getLocationJSONObject(location);
                 emit(MOBILE_LOCATION_EMIT, locationJSONData);
                 Log.d("SOCKET", "LOCATION EMIT");
