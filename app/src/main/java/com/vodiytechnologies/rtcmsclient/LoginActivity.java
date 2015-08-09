@@ -68,9 +68,11 @@ public class LoginActivity extends Activity {
                         public void onResponse(JSONObject jsonObject) {
 
                             String responseStatus;
+                            String clientId;
                             String clientName;
                             try {
                                 responseStatus = jsonObject.getString("responseStatus");
+                                clientId = jsonObject.getJSONObject("responseBody").getJSONObject("userProfile").getString("id_user_profile");
                                 String firstName = jsonObject.getJSONObject("responseBody").getJSONObject("userProfile").getString("first_name");
                                 String lastName = jsonObject.getJSONObject("responseBody").getJSONObject("userProfile").getString("last_name");
                                 clientName = firstName + " " + lastName;
@@ -80,7 +82,7 @@ public class LoginActivity extends Activity {
                             }
                             Toast.makeText(getApplicationContext(), responseStatus, Toast.LENGTH_SHORT).show();
                             responseTextView.setText(jsonObject.toString());
-                            signIn(clientName);
+                            signIn(clientId,clientName);
                         }
                     }, new Response.ErrorListener() {
                         @Override
@@ -96,10 +98,11 @@ public class LoginActivity extends Activity {
         });
     }
 
-    private void signIn(String clientName) {
+    private void signIn(String clientId ,String clientName) {
         Intent intent = new Intent(this, MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        intent.putExtra("clientId", clientId);
         intent.putExtra("client", clientName);
         startActivity(intent);
         finish();
