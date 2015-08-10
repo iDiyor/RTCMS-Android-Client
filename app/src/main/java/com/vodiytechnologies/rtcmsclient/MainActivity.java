@@ -169,6 +169,15 @@ public class MainActivity extends FragmentActivity {
             case 1:
                 fragment = new MessageFragment();
             break;
+            case 2:
+                fragment = new HistoryFragment();
+                break;
+            case 3:
+                fragment = new JobFragment();
+                break;
+            case 4:
+                fragment = new MapFragment();
+                break;
             default:
                 break;
         }
