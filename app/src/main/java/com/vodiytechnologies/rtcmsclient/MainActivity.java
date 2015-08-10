@@ -161,18 +161,27 @@ public class MainActivity extends FragmentActivity {
 
     private void selectItem(int position) {
         // update the main content by replacing fragments
-        Fragment fragment = new CommandCentreFragment();
-//        Bundle args = new Bundle();
-//        args.putInt(PlanetFragment.ARG_PLANET_NUMBER, position);
-//        fragment.setArguments(args);
+        Fragment fragment = null;
+        switch (position) {
+            case 0:
+                fragment = new CommandCentreFragment();
+            break;
+            case 1:
+                fragment = new MessageFragment();
+            break;
+            default:
+                break;
+        }
 
-        FragmentManager fragmentManager = getFragmentManager();
-        fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
+        if (fragment != null) {
+            FragmentManager fragmentManager = getFragmentManager();
+            fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
 
-        // update selected item and title, then close the drawer
-        mDrawerList.setItemChecked(position, true);
-        setTitle(mNavigationTitles[position]);
-        mDrawerLayout.closeDrawer(mDrawerList);
+            // update selected item and title, then close the drawer
+            mDrawerList.setItemChecked(position, true);
+            setTitle(mNavigationTitles[position]);
+            mDrawerLayout.closeDrawer(mDrawerList);
+        }
     }
 
     @Override
