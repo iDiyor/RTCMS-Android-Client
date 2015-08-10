@@ -47,6 +47,8 @@ public class MainActivity extends FragmentActivity {
     // current status as a key should be same in receiver
     public static final String CURRENT_STATUS = "CURRENT_STATUS";
 
+    Fragment mFragment;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -99,8 +101,9 @@ public class MainActivity extends FragmentActivity {
     public void onButtonClick(View v) {
         Button button = (Button)v;
         String text = button.getText().toString();
-        // Should update Command Centre Fragment
-
+        if (mFragment != null && mFragment instanceof CommandCentreFragment) {
+            ((CommandCentreFragment) mFragment).setStatus(text);
+        }
         broadcast(CURRENT_STATUS, text, CURRENT_STATUS_UPDATE_ACTION);
     }
 
@@ -161,30 +164,30 @@ public class MainActivity extends FragmentActivity {
 
     private void selectItem(int position) {
         // update the main content by replacing fragments
-        Fragment fragment = null;
+        mFragment = null;
         switch (position) {
             case 0:
-                fragment = new CommandCentreFragment();
+                mFragment = new CommandCentreFragment();
             break;
             case 1:
-                fragment = new MessageFragment();
+                mFragment = new MessageFragment();
             break;
             case 2:
-                fragment = new HistoryFragment();
+                mFragment = new HistoryFragment();
                 break;
             case 3:
-                fragment = new JobFragment();
+                mFragment = new JobFragment();
                 break;
             case 4:
-                fragment = new MapFragment();
+                mFragment = new MapFragment();
                 break;
             default:
                 break;
         }
 
-        if (fragment != null) {
+        if (mFragment != null) {
             FragmentManager fragmentManager = getFragmentManager();
-            fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
+            fragmentManager.beginTransaction().replace(R.id.content_frame, mFragment).commit();
 
             // update selected item and title, then close the drawer
             mDrawerList.setItemChecked(position, true);
