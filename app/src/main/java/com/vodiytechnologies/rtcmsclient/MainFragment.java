@@ -62,7 +62,7 @@ public class MainFragment extends Fragment{
 //        commandCentreButton.setOnClickListener(new View.OnClickListener() {
 //            @Override
 //            public void onClick(View v) {
-//                Intent intent = new Intent(MainActivity.this, CommandCentreActivity.class);
+//                Intent intent = new Intent(MainActivity.this, CommandCentreFragment.class);
 //                startActivity(intent);
 //            }
 //        });

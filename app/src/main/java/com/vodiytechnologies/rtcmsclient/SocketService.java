@@ -113,7 +113,7 @@ public class SocketService extends Service {
         /**
          * CONTROL CENTRE BROADCAST REGISTER
          */
-        IntentFilter statusUpdateIntentFilter = new IntentFilter(CommandCentreActivity.CURRENT_STATUS_UPDATE_ACTION);
+        IntentFilter statusUpdateIntentFilter = new IntentFilter(CommandCentreFragment.CURRENT_STATUS_UPDATE_ACTION);
         LocalBroadcastManager.getInstance(this).registerReceiver(socketBroadcastReceiver,statusUpdateIntentFilter);
 
         // Start up the thread running the service.  Note that we create a
@@ -329,8 +329,8 @@ public class SocketService extends Service {
             /****************************
              * COMMAND CENTRE BROADCAST
              ****************************/
-            if (intent.getAction().equals(CommandCentreActivity.CURRENT_STATUS_UPDATE_ACTION)) {
-                String status = intent.getStringExtra(CommandCentreActivity.CURRENT_STATUS);
+            if (intent.getAction().equals(CommandCentreFragment.CURRENT_STATUS_UPDATE_ACTION)) {
+                String status = intent.getStringExtra(CommandCentreFragment.CURRENT_STATUS);
 
                 JSONObject statusJSONData = createClientStatusJSONObject(status);
                 emit(MOBILE_CLIENT_STATUS_EMIT, statusJSONData);
