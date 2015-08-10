@@ -7,108 +7,43 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.location.Location;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v4.widget.DrawerLayout;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 
-public class MainActivity extends Activity {//implements ConnectionCallbacks, OnConnectionFailedListener , LocationListener{ //SocketResultReceiver.Receiver {
+public class MainActivity extends FragmentActivity {
 
-    private Location mCurrentLocation;
-
-    // TextViews
-    private TextView mLongitudeTextView;
-    private TextView mLatitudeTextView;
-    private TextView mMessageTextView;
 
     private String mClient;
     private String mClientId;
+
+    private String[] mNavigationTitles;
+    private DrawerLayout mDrawerLayout;
+    private ListView mDrawerList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_container_activity);
 
-        mLongitudeTextView = (TextView) findViewById(R.id.longitudeId);
-        mLatitudeTextView = (TextView) findViewById(R.id.latitudeId);
-        mMessageTextView = (TextView) findViewById(R.id.messageId);
+        mNavigationTitles = getResources().getStringArray(R.array.navigation_array);
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        mDrawerList = (ListView) findViewById(R.id.left_drawer);
 
-        TextView userTextVew = (TextView) findViewById(R.id.userTextViewId);
+        // Set the adapter for the list view
+        mDrawerList.setAdapter(new ArrayAdapter<String>(this, R.layout.drawer_list_item, mNavigationTitles));
 
-        userTextVew.setText("User ID: " + mClientId + ": " + mClient);
+        // set a custom shadow that overlays the main content when the drawer opens
+        mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
 
-        final Button startServiceButton = (Button) findViewById(R.id.startServiceButtonId);
-        startServiceButton.setOnClickListener(new View.OnClickListener() {
-              @Override
-              public void onClick(View v) {
-                  // Socket service
-                  Intent socketIntent = new Intent(MainActivity.this, SocketService.class);
-                  socketIntent.putExtra("clientId", mClientId);
-                  socketIntent.putExtra("client", mClient);
-
-                  startService(socketIntent);
-                  // Location service
-                  Intent locationIntent = new Intent(MainActivity.this, LocationService.class);
-                  startService(locationIntent);
-
-              }
-        });
-
-        Button stopServiceButton = (Button) findViewById(R.id.stopServiceButtonId);
-        stopServiceButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Location service
-                Intent locationIntent = new Intent(MainActivity.this, LocationService.class);
-                stopService(locationIntent);
-                setCurrentLocation(null);
-                // Socket service
-                Intent intent = new Intent(MainActivity.this, SocketService.class);
-                stopService(intent);
-                showMessage("Socket connection disconnected");
-
-
-            }
-        });
-
-        Button commandCentreButton = (Button) findViewById(R.id.commandCentreButtonId);
-        commandCentreButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, CommandCentreActivity.class);
-                startActivity(intent);
-            }
-        });
-    }
-
-    private void setCurrentLocation(Location location) {
-        mCurrentLocation = location;
-        displayLocation();
-    }
-
-    public Location getCurrentLocation() {
-        if (mCurrentLocation != null)
-            return mCurrentLocation;
-        return null;
-    }
-
-    // message from server
-    public void showMessage(String message) {
-        mMessageTextView.setText(message);
-    }
-
-    public void displayLocation() {
-        if (getCurrentLocation() != null) {
-            double latitude = getCurrentLocation().getLatitude();
-            double longitude = getCurrentLocation().getLongitude();
-            mLongitudeTextView.setText(String.valueOf(longitude));
-            mLatitudeTextView.setText(String.valueOf(latitude));
-        } else {
-            mLongitudeTextView.setText("Location Service is not available");
-            mLatitudeTextView.setText("Location Service is not available");
-        }
     }
 
     @Override
@@ -120,9 +55,10 @@ public class MainActivity extends Activity {//implements ConnectionCallbacks, On
     protected void onResume() {
         super.onResume();
 
-        mClient = getIntent().getStringExtra("client");
-        mClientId = getIntent().getStringExtra("clientId");
-
+        //mClient = getIntent().getStringExtra("client");
+        //mClientId = getIntent().getStringExtra("clientId");
+        mClient = "Steve Jobs";
+        mClientId = "1";
         // Socket service
         Intent socketIntent = new Intent(MainActivity.this, SocketService.class);
         socketIntent.putExtra("clientId", mClientId);
@@ -160,11 +96,11 @@ public class MainActivity extends Activity {//implements ConnectionCallbacks, On
         // Location service
         Intent locationIntent = new Intent(MainActivity.this, LocationService.class);
         stopService(locationIntent);
-        setCurrentLocation(null);
+        //setCurrentLocation(null);
         // Socket service
         Intent intent = new Intent(MainActivity.this, SocketService.class);
         stopService(intent);
-        showMessage("Socket connection disconnected");
+        //showMessage("Socket connection disconnected");
 
         // unregister receiver
         LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver);
@@ -190,7 +126,7 @@ public class MainActivity extends Activity {//implements ConnectionCallbacks, On
             ***************************/
             if (intent.getAction().equals(SocketService.SOCKET_CONNECTION_SUCCESS_ACTION)) {
                 String message = intent.getStringExtra(SocketService.CONNECTION_STATUS);
-                showMessage(message);
+                //showMessage(message);
                 Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
             }
 
@@ -202,7 +138,7 @@ public class MainActivity extends Activity {//implements ConnectionCallbacks, On
 
             if (intent.getAction().equals(SocketService.SOCKET_CONNECTION_ERROR_ACTION)) {
                 String message = intent.getStringExtra(SocketService.CONNECTION_STATUS);
-                showMessage(message);
+                //showMessage(message);
                 Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
             }
 
@@ -211,7 +147,7 @@ public class MainActivity extends Activity {//implements ConnectionCallbacks, On
             ****************************/
             if (intent.getAction().equals(LocationService.LOCATION_UPDATE_ACTION)) {
                 Location location = intent.getParcelableExtra(LocationService.LOCATION_MESSAGE);
-                setCurrentLocation(location);
+                //setCurrentLocation(location);
                 //Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
             }
 

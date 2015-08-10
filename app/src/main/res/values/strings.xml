@@ -1,6 +1,14 @@
 <resources>
     <string name="app_name">RTCMS Client</string>
 
+    <string-array name="navigation_array">
+        <item>Command Centre</item>
+        <item>Messages</item>
+        <item>History</item>
+        <item>Job</item>
+        <item>Map</item>
+    </string-array>
+    
     <string name="hello_world">RTCMS Android Client App</string>
 
     <string name="action_settings">Settings</string>
