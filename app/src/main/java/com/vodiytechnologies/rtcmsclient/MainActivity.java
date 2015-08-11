@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.location.Location;
+import android.media.MediaRouter;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.app.Fragment;
@@ -33,6 +34,7 @@ public class MainActivity extends FragmentActivity {
 
     private String mClient;
     private String mClientId;
+    private String mClientCurrentStatus;
 
     private String[] mNavigationTitles;
     private DrawerLayout mDrawerLayout;
@@ -101,6 +103,7 @@ public class MainActivity extends FragmentActivity {
     public void onButtonClick(View v) {
         Button button = (Button)v;
         String text = button.getText().toString();
+        mClientCurrentStatus = text;
         if (mFragment != null && mFragment instanceof CommandCentreFragment) {
             ((CommandCentreFragment) mFragment).setStatus(text);
         }
@@ -154,7 +157,7 @@ public class MainActivity extends FragmentActivity {
         }
     }
 
-    /* The click listner for ListView in the navigation drawer */
+    /* The click listener for ListView in the navigation drawer */
     private class DrawerItemClickListener implements ListView.OnItemClickListener {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -166,20 +169,32 @@ public class MainActivity extends FragmentActivity {
         // update the main content by replacing fragments
         mFragment = null;
         switch (position) {
-            case 0:
+            case 0: // Commands
                 mFragment = new CommandCentreFragment();
+                if (mClientCurrentStatus != null) {
+                    Bundle args = new Bundle();
+                    args.putString("clientStatus", mClientCurrentStatus);
+                    mFragment.setArguments(args);
+                }
+
             break;
-            case 1:
+            case 1: // Messages
                 mFragment = new MessageFragment();
+                Bundle args = new Bundle();
+                args.putString("clientId", mClientId);
+                mFragment.setArguments(args);
             break;
-            case 2:
+            case 2: // History
                 mFragment = new HistoryFragment();
                 break;
-            case 3:
+            case 3: // Job
                 mFragment = new JobFragment();
                 break;
-            case 4:
+            case 4: // Map
                 mFragment = new MapFragment();
+                break;
+            case 5: // User Profile
+                mFragment = new UserProfileFragment();
                 break;
             default:
                 break;
@@ -206,7 +221,6 @@ public class MainActivity extends FragmentActivity {
      * When using the ActionBarDrawerToggle, you must call it during
      * onPostCreate() and onConfigurationChanged()...
      */
-
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
@@ -230,15 +244,13 @@ public class MainActivity extends FragmentActivity {
     protected void onResume() {
         super.onResume();
 
-        //mClient = getIntent().getStringExtra("client");
-        //mClientId = getIntent().getStringExtra("clientId");
-        mClient = "Steve Jobs";
-        mClientId = "1";
+        mClient = getIntent().getStringExtra("client");
+        mClientId = getIntent().getStringExtra("clientId");
+
         // Socket service
         Intent socketIntent = new Intent(MainActivity.this, SocketService.class);
         socketIntent.putExtra("clientId", mClientId);
         socketIntent.putExtra("client", mClient);
-
         startService(socketIntent);
         // Location service
         Intent locationIntent = new Intent(MainActivity.this, LocationService.class);
@@ -320,11 +332,11 @@ public class MainActivity extends FragmentActivity {
             /****************************
             * LOCATION SERVICE BROADCAST
             ****************************/
-            if (intent.getAction().equals(LocationService.LOCATION_UPDATE_ACTION)) {
-                Location location = intent.getParcelableExtra(LocationService.LOCATION_MESSAGE);
-                //setCurrentLocation(location);
-                //Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
-            }
+//            if (intent.getAction().equals(LocationService.LOCATION_UPDATE_ACTION)) {
+//                Location location = intent.getParcelableExtra(LocationService.LOCATION_MESSAGE);
+//                //setCurrentLocation(location);
+//                //Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
+//            }
 
         }
     };

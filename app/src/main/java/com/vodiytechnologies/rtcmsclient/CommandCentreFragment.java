@@ -1,5 +1,6 @@
 package com.vodiytechnologies.rtcmsclient;
 
+import android.app.Activity;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.view.LayoutInflater;
@@ -23,6 +24,8 @@ public class CommandCentreFragment extends Fragment{
         final View fragmentView = inflater.inflate(R.layout.command_centre_fragment, container, false);
 
         mCurrentStatusTextView = (TextView) fragmentView.findViewById(R.id.currentStatusTextViewId);
+
+
 
         return fragmentView;
     }

@@ -46,6 +46,7 @@ public class SocketService extends Service {
     private static final String MOBILE_CLIENT_CONNECTION_EMIT = "client:connection";
     private static final String MOBILE_CLIENT_DISCONNECTION_EMIT = "client:disconnect";
     private static final String MOBILE_ON_MESSAGE_FROM_SERVER = "server:message";
+    private static final String MOBILE_CLIENT_MESSAGE_SEND = "mobile:client:message:send";
 
 
     // MESSAGE NAME
@@ -115,7 +116,11 @@ public class SocketService extends Service {
          */
         IntentFilter statusUpdateIntentFilter = new IntentFilter(CommandCentreFragment.CURRENT_STATUS_UPDATE_ACTION);
         LocalBroadcastManager.getInstance(this).registerReceiver(socketBroadcastReceiver,statusUpdateIntentFilter);
-
+        /**
+         * MESSAGE BROADCAST REGISTER
+         */
+        IntentFilter messageSendIntentFilter = new IntentFilter(MessageFragment.MESSAGE_SEND_ACTION);
+        LocalBroadcastManager.getInstance(this).registerReceiver(socketBroadcastReceiver, messageSendIntentFilter);
         // Start up the thread running the service.  Note that we create a
         // separate thread because the service normally runs in the process's
         // main thread, which we don't want to block.  We also make it
@@ -335,6 +340,24 @@ public class SocketService extends Service {
                 JSONObject statusJSONData = createClientStatusJSONObject(status);
                 emit(MOBILE_CLIENT_STATUS_EMIT, statusJSONData);
                 Log.d("SOCKET", "STATUS EMIT");
+            }
+
+            /****************************
+             * MESSAGES BROADCAST
+             ****************************/
+            if (intent.getAction().equals(MessageFragment.MESSAGE_SEND_ACTION)) {
+                JSONObject messageBody = null;
+                try {
+                    messageBody = new JSONObject(intent.getStringExtra(MessageFragment.MESSAGE_BODY));
+                } catch (JSONException e) {
+                    Log.d(TAG, "MESSAGE_BODY_JSON_EXCEPTION");
+                    return;
+                }
+
+                if (messageBody != null) {
+                    emit(MOBILE_CLIENT_MESSAGE_SEND, messageBody);
+                    Log.d(TAG, "MESSAGE_EMTI");
+                }
             }
         }
     };

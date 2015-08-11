@@ -7,6 +7,7 @@
         <item>History</item>
         <item>Job</item>
         <item>Map</item>
+        <item>User Profile</item>
     </string-array>
 
     <string name="drawer_open">Open navigation drawer</string>
