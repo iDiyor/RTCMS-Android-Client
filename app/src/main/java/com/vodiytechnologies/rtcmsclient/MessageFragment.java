@@ -20,8 +20,10 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.w3c.dom.Text;
@@ -47,6 +49,8 @@ public class MessageFragment extends Fragment {
 
     private String mClientId;
 
+
+
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final View fragmentView = inflater.inflate(R.layout.message_fragment, container, false);
@@ -65,8 +69,8 @@ public class MessageFragment extends Fragment {
         other.setText("Admin");
         loadMessagesHistory();
 
-        final RequestQueue queue = VolleySingleton.getInstance(getActivity().getApplicationContext()).getRequestQueue();
 
+        final RequestQueue mQueue = VolleySingleton.getInstance(getActivity().getApplicationContext()).getRequestQueue();
 
         mSendButton.setOnClickListener(new View.OnClickListener() {
 
@@ -125,9 +129,10 @@ public class MessageFragment extends Fragment {
                                 return;
                             }
 
-                            broadcastMessage(MESSAGE_BODY, responseBody, MESSAGE_SEND_ACTION);
-                            addMessageToLocalList(messageContent, time, true);
-
+                            if (responseStatus.equals("success")) {
+                                broadcastMessage(MESSAGE_BODY, responseBody, MESSAGE_SEND_ACTION);
+                                addMessageToLocalList(messageContent, time, true);
+                            }
                         }
                     }, new Response.ErrorListener() {
                         @Override
@@ -135,7 +140,7 @@ public class MessageFragment extends Fragment {
                             Toast.makeText(getActivity(), "Error", Toast.LENGTH_SHORT).show();
                         }
                     });
-                    queue.add(jsonReq);
+                    mQueue.add(jsonReq);
                 } else {
                     Toast.makeText(getActivity(), "Null params", Toast.LENGTH_SHORT).show();
                 }
@@ -177,69 +182,58 @@ public class MessageFragment extends Fragment {
         mAdapter = new MessageAdapter(getActivity(), new ArrayList<Message>());
         mMessageContainer.setAdapter(mAdapter);
 
-        JSONObject params = null;
-        try {
-            params = new JSONObject();
-            params.put("to_id_user_profile", mClientId);
-            params.put("from_id_user_profile", 2);
-        } catch (JSONException e) {
-            Toast.makeText(getActivity(), "Could not send the message", Toast.LENGTH_SHORT).show();
-            return;
-        }
 
-        if (params != null) {
-            JsonObjectRequest jsonReq = new JsonObjectRequest(Request.Method.POST, messageAPIUrl, params, new Response.Listener<JSONObject>() {
-                @Override
-                public void onResponse(JSONObject jsonObject) {
+        final RequestQueue mQueue = VolleySingleton.getInstance(getActivity().getApplicationContext()).getRequestQueue();
 
-//                            "responseTitle": "Inserting a new message into the database",
-//                                    "responseStatus": "success",
-//                                    "responseBody": {
-//                                "to_id_user_profile": "2",
-//                                        "from_id_user_profile": "3",
-//                                        "content": "I want a Tesla X",
-//                                        "time": "2015-08-11T00:50:59.855Z",
-//                                        "id_message": 31,
-//                                        "fromUser": {
-//                                    "id_user_profile": 3,
-//                                            "first_name": "Elon",
-//                                            "last_name": "Musk"
-//                                },
-//                                "toUser": {
-//                                    "id_user_profile": 2,
-//                                            "first_name": "Diyorbek",
-//                                            "last_name": "Islomov"
-//                                }
-                    String responseStatus;
-                    String messageContent;
-                    String time;
-                    JSONObject responseBody;
+        // it will also response with admin messages
+        String getClietsMessagesAPIUrl = "http://52.28.143.209:3000/api/messages/" + mClientId + "/" + 2;
+
+        // get to_client messages
+        JsonArrayRequest jsonReq1 = new JsonArrayRequest(getClietsMessagesAPIUrl,new Response.Listener<JSONArray>() {
+            @Override
+            public void onResponse(JSONArray jsonResponseArray) {
+
                     try {
-                        responseStatus = jsonObject.getString("responseStatus");
-                        responseBody = jsonObject.getJSONObject("responseBody");
-                        messageContent = jsonObject.getJSONObject("responseBody").getString("content");
-                        time = jsonObject.getJSONObject("responseBody").getString("time");
+                        for (int i = 0; i < jsonResponseArray.length() - 1; i++) {
+                            JSONObject objectA = (JSONObject)jsonResponseArray.get(i);
+                            JSONObject objectB = (JSONObject)jsonResponseArray.get(i + 1);
+
+                            int messageIdA = Integer.valueOf(objectA.getString("id_message"));
+                            String messageContentA = objectA.getString("content");
+                            String timeA = objectA.getString("time");
+                            String fromClientA = objectA.getString("from_id_user_profile");
+
+                            int messageIdB = Integer.valueOf(objectB.getString("id_message"));
+                            String messageContentB = objectB.getString("content");
+                            String timeB = objectB.getString("time");
+                            String fromClientB = objectB.getString("from_id_user_profile");
+
+                            if ((messageIdA - messageIdB) < 0) {
+                                if (fromClientA.equals(mClientId)) {
+                                    addMessageToLocalList(messageContentA, timeA, true);
+                                } else {
+                                    addMessageToLocalList(messageContentA, timeA, false);
+                                }
+                            } else  {
+                                if (fromClientB.equals(mClientId)) {
+                                    addMessageToLocalList(messageContentB, timeB, true);
+                                } else {
+                                    addMessageToLocalList(messageContentB, timeB, false);
+                                }
+                            }
+                        }
                     } catch (JSONException e) {
                         Log.d("JSONException", "JSONException while JsonResponse");
                         return;
                     }
-
-                    broadcastMessage(MESSAGE_BODY, responseBody, MESSAGE_SEND_ACTION);
-                    addMessageToLocalList(messageContent, time, true);
-
                 }
-            }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError volleyError) {
-                    Toast.makeText(getActivity(), "Error", Toast.LENGTH_SHORT).show();
-                }
-            });
-            queue.add(jsonReq);
-        } else {
-            Toast.makeText(getActivity(), "Null params", Toast.LENGTH_SHORT).show();
-        }
-
-
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError volleyError) {
+                Toast.makeText(getActivity(), "Error", Toast.LENGTH_SHORT).show();
+            }
+        });
+        mQueue.add(jsonReq1);
     }
 
     // on receive message receiver - from server - socket
