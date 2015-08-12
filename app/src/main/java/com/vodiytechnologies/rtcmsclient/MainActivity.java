@@ -170,19 +170,24 @@ public class MainActivity extends FragmentActivity {
         mFragment = null;
         switch (position) {
             case 0: // Commands
+            {
                 mFragment = new CommandCentreFragment();
+                Bundle args = new Bundle();
                 if (mClientCurrentStatus != null) {
-                    Bundle args = new Bundle();
                     args.putString("clientStatus", mClientCurrentStatus);
-                    mFragment.setArguments(args);
+                } else {
+                    args.putString("clientStatus", "No Job");
                 }
-
+                mFragment.setArguments(args);
+            }
             break;
             case 1: // Messages
+            {
                 mFragment = new MessageFragment();
                 Bundle args = new Bundle();
                 args.putString("clientId", mClientId);
                 mFragment.setArguments(args);
+            }
             break;
             case 2: // History
                 mFragment = new HistoryFragment();

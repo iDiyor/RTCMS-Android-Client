@@ -25,7 +25,8 @@ public class CommandCentreFragment extends Fragment{
 
         mCurrentStatusTextView = (TextView) fragmentView.findViewById(R.id.currentStatusTextViewId);
 
-
+        String status = getArguments().getString("clientStatus");
+        setStatus(status);
 
         return fragmentView;
     }

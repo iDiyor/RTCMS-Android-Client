@@ -126,7 +126,7 @@ public class MessageFragment extends Fragment {
                             }
 
                             broadcastMessage(MESSAGE_BODY, responseBody, MESSAGE_SEND_ACTION);
-
+                            addMessageToLocalList(messageContent, time, true);
 
                         }
                     }, new Response.ErrorListener() {
@@ -172,6 +172,73 @@ public class MessageFragment extends Fragment {
     }
 
     private void loadMessagesHistory() {
+        mMessageHistory  = new ArrayList<Message>();
+
+        mAdapter = new MessageAdapter(getActivity(), new ArrayList<Message>());
+        mMessageContainer.setAdapter(mAdapter);
+
+        JSONObject params = null;
+        try {
+            params = new JSONObject();
+            params.put("to_id_user_profile", mClientId);
+            params.put("from_id_user_profile", 2);
+        } catch (JSONException e) {
+            Toast.makeText(getActivity(), "Could not send the message", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (params != null) {
+            JsonObjectRequest jsonReq = new JsonObjectRequest(Request.Method.POST, messageAPIUrl, params, new Response.Listener<JSONObject>() {
+                @Override
+                public void onResponse(JSONObject jsonObject) {
+
+//                            "responseTitle": "Inserting a new message into the database",
+//                                    "responseStatus": "success",
+//                                    "responseBody": {
+//                                "to_id_user_profile": "2",
+//                                        "from_id_user_profile": "3",
+//                                        "content": "I want a Tesla X",
+//                                        "time": "2015-08-11T00:50:59.855Z",
+//                                        "id_message": 31,
+//                                        "fromUser": {
+//                                    "id_user_profile": 3,
+//                                            "first_name": "Elon",
+//                                            "last_name": "Musk"
+//                                },
+//                                "toUser": {
+//                                    "id_user_profile": 2,
+//                                            "first_name": "Diyorbek",
+//                                            "last_name": "Islomov"
+//                                }
+                    String responseStatus;
+                    String messageContent;
+                    String time;
+                    JSONObject responseBody;
+                    try {
+                        responseStatus = jsonObject.getString("responseStatus");
+                        responseBody = jsonObject.getJSONObject("responseBody");
+                        messageContent = jsonObject.getJSONObject("responseBody").getString("content");
+                        time = jsonObject.getJSONObject("responseBody").getString("time");
+                    } catch (JSONException e) {
+                        Log.d("JSONException", "JSONException while JsonResponse");
+                        return;
+                    }
+
+                    broadcastMessage(MESSAGE_BODY, responseBody, MESSAGE_SEND_ACTION);
+                    addMessageToLocalList(messageContent, time, true);
+
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError volleyError) {
+                    Toast.makeText(getActivity(), "Error", Toast.LENGTH_SHORT).show();
+                }
+            });
+            queue.add(jsonReq);
+        } else {
+            Toast.makeText(getActivity(), "Null params", Toast.LENGTH_SHORT).show();
+        }
+
 
     }
 
