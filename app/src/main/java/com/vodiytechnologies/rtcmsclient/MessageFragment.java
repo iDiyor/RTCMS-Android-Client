@@ -67,6 +67,7 @@ public class MessageFragment extends Fragment {
         RelativeLayout viewContainer = (RelativeLayout) fragmentView.findViewById(R.id.container);
 
         other.setText("Admin");
+        self.setText("Me");
         loadMessagesHistory();
 
 
@@ -152,7 +153,7 @@ public class MessageFragment extends Fragment {
     }
 
 
-    private void addMessageToLocalList(String content, String time, boolean isSelf) {
+    public void addMessageToLocalList(String content, String time, boolean isSelf) {
         Message message = new Message();
         message.setId(1);
         message.setContent(content);
@@ -194,32 +195,17 @@ public class MessageFragment extends Fragment {
             public void onResponse(JSONArray jsonResponseArray) {
 
                     try {
-                        for (int i = 0; i < jsonResponseArray.length() - 1; i++) {
-                            JSONObject objectA = (JSONObject)jsonResponseArray.get(i);
-                            JSONObject objectB = (JSONObject)jsonResponseArray.get(i + 1);
+                        final JSONArray sortedArray = selectionSort(jsonResponseArray);
+                        for (int i = 0; i < sortedArray.length(); i++) {
+                            JSONObject objectX = (JSONObject)jsonResponseArray.get(i);
+                            String messageContent = objectX.getString("content");
+                            String time = objectX.getString("time");
+                            String fromClient = objectX.getString("from_id_user_profile");
 
-                            int messageIdA = Integer.valueOf(objectA.getString("id_message"));
-                            String messageContentA = objectA.getString("content");
-                            String timeA = objectA.getString("time");
-                            String fromClientA = objectA.getString("from_id_user_profile");
-
-                            int messageIdB = Integer.valueOf(objectB.getString("id_message"));
-                            String messageContentB = objectB.getString("content");
-                            String timeB = objectB.getString("time");
-                            String fromClientB = objectB.getString("from_id_user_profile");
-
-                            if ((messageIdA - messageIdB) < 0) {
-                                if (fromClientA.equals(mClientId)) {
-                                    addMessageToLocalList(messageContentA, timeA, true);
-                                } else {
-                                    addMessageToLocalList(messageContentA, timeA, false);
-                                }
-                            } else  {
-                                if (fromClientB.equals(mClientId)) {
-                                    addMessageToLocalList(messageContentB, timeB, true);
-                                } else {
-                                    addMessageToLocalList(messageContentB, timeB, false);
-                                }
+                            if (fromClient.equals(mClientId)) {
+                                addMessageToLocalList(messageContent, time, true);
+                            } else {
+                                addMessageToLocalList(messageContent, time, false);
                             }
                         }
                     } catch (JSONException e) {
@@ -236,5 +222,28 @@ public class MessageFragment extends Fragment {
         mQueue.add(jsonReq1);
     }
 
+    private JSONArray selectionSort(JSONArray array) throws JSONException{
+        //JSONArray sortedArray = new JSONArray();
+        for (int i = 0; i < array.length(); i++) {
+            JSONObject objectA = (JSONObject)array.get(i);
+            int index = i;
+            for (int j = i + 1; j < array.length(); j++) {
+
+                JSONObject objectB = (JSONObject)array.get(j);
+
+                int messageIdA = Integer.valueOf(objectA.getString("id_message"));
+                int messageIdB = Integer.valueOf(objectB.getString("id_message"));
+
+                if (messageIdB < messageIdA) {
+                    index = j;
+                }
+            }
+            JSONObject objectWithSmallestId = (JSONObject)array.get(index);
+            //sortedArray.put(objectWithSmallestId);
+            array.put(index, objectA);
+            array.put(i, objectWithSmallestId);
+        }
+        return array;
+    }
     // on receive message receiver - from server - socket
 }

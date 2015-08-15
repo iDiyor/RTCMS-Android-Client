@@ -9,7 +9,13 @@
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme.Day" >
+        android:theme="@style/AppTheme.Day">
+
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyBCI0ct0tnAVqdFuT5YZRrg6Zoz8kppSCo"/>
+
+
         <!--LOGIN ACTIVITY-->
         <activity
             android:name=".LoginActivity"
@@ -22,16 +28,8 @@
         <!--MAIN ACTIVITY-->
         <activity
             android:name=".MainActivity"
-            android:label="@string/app_name" >
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </activity>
-        <!--Command Centre ACTIVITY-->
-        <activity
-            android:name=".CommandCentreFragment"
-            android:label="@string/app_name" >
+            android:label="@string/app_name"
+            android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />

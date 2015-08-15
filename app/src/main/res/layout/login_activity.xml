@@ -1,37 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:IDLib="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/login_activity_background">
 
-    <TextView
+    <com.vodiytechnologies.rtcmsclient.TypefacedTextView
         android:id="@+id/login_text_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        IDLib:fontNameForButton="@string/Roboto_Light"
+        android:textColor="@color/login_activity_text_view_color"
         android:text="Login Activity"/>
-    <TextView
+    <com.vodiytechnologies.rtcmsclient.TypefacedTextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        IDLib:fontNameForButton="@string/Roboto_Light"
+        android:textColor="@color/login_activity_text_view_color"
         android:text="Username"/>
-    <EditText
+    <com.vodiytechnologies.rtcmsclient.TypefacedEditText
         android:id="@+id/usernameEditTextId"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
-    <TextView
+        android:layout_height="wrap_content"
+        android:textColor="@color/login_activity_edit_text_color"
+        IDLib:fontNameForButton="@string/Roboto_Light"/>
+    <com.vodiytechnologies.rtcmsclient.TypefacedTextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:textColor="@color/login_activity_text_view_color"
+        IDLib:fontNameForButton="@string/Roboto_Light"
         android:text="Password"/>
-    <EditText
+    <com.vodiytechnologies.rtcmsclient.TypefacedEditText
         android:id="@+id/passwordEditTextId"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
-    <Button
+        android:layout_height="wrap_content"
+        android:textColor="@color/login_activity_edit_text_color"
+        IDLib:fontNameForButton="@string/Roboto_Light"/>
+    <com.vodiytechnologies.rtcmsclient.TypefacedButton
         android:id="@+id/signInButtonId"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:background="@color/signin_button_background"
+        IDLib:fontNameForButton="@string/Roboto_Light"
         android:text="Sign In"/>
     <TextView
         android:id="@+id/responseTextViewId"

@@ -2,6 +2,9 @@ package com.vodiytechnologies.rtcmsclient;
 
 import android.app.Activity;
 import android.app.FragmentManager;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.SearchManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -17,6 +20,7 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -28,8 +32,15 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.net.Socket;
+
 
 public class MainActivity extends FragmentActivity {
+
+    private static final String TAG = "MainActivity:Message";
 
 
     private String mClient;
@@ -49,7 +60,11 @@ public class MainActivity extends FragmentActivity {
     // current status as a key should be same in receiver
     public static final String CURRENT_STATUS = "CURRENT_STATUS";
 
+    private static final String SHOW_MESSAGE_FRAGMENT_ACTION = "SHOW_MESSAGE_FRAGMENT_ACTION";
+
     Fragment mFragment;
+
+    private Location mLocation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,7 +113,6 @@ public class MainActivity extends FragmentActivity {
         if (savedInstanceState == null) {
             selectItem(0);
         }
-
     }
     public void onButtonClick(View v) {
         Button button = (Button)v;
@@ -197,6 +211,9 @@ public class MainActivity extends FragmentActivity {
                 break;
             case 4: // Map
                 mFragment = new MapFragment();
+                Bundle args = new Bundle();
+                args.putParcelable("myLocation", getLocation());
+                mFragment.setArguments(args);
                 break;
             case 5: // User Profile
                 mFragment = new UserProfileFragment();
@@ -240,6 +257,58 @@ public class MainActivity extends FragmentActivity {
         mDrawerToggle.onConfigurationChanged(newConfig);
     }
 
+    private void showNotification(String receiverCliendId, String receiverName, String notificationTitle, String notificationMessage) {
+        Intent intent = new Intent(this, MainActivity.class);
+        //Intent intent = new Intent();
+        intent.setAction(SHOW_MESSAGE_FRAGMENT_ACTION);
+        intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        intent.putExtra("clientId", receiverCliendId);
+        intent.putExtra("client", receiverName);
+        int iUniqueId = (int) (System.currentTimeMillis() & 0xfffffff);
+        PendingIntent pIntent = PendingIntent.getActivity(getApplicationContext(),iUniqueId,intent,PendingIntent.FLAG_UPDATE_CURRENT);
+
+        Notification notification = new Notification.Builder(this)
+                .setContentTitle("New message from the admin")
+                .setContentText(notificationMessage)
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setContentIntent(pIntent)
+                .setAutoCancel(true).build();
+
+        notification.defaults |= Notification.DEFAULT_SOUND;
+
+        NotificationManager notificationManager = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
+        notificationManager.notify(1, notification);
+
+    }
+
+    @Override
+    protected void onNewIntent (Intent intent) {
+        try {
+            String action = intent.getAction();
+            if (action != null) {
+                if (action.equals(SHOW_MESSAGE_FRAGMENT_ACTION)) {
+                    mClientId = getIntent().getStringExtra("clientId");
+                    mClient = getIntent().getStringExtra("client");
+                    selectItem(1);
+                }
+            }
+        } catch (Exception e) {
+            Log.d(TAG, "Problem consuming action from notification intent");
+        }
+    }
+
+    private void setLocation(Location location) {
+        mLocation = location;
+        Log.d(TAG, "MAIN_ACTIVITY_LOCATION_SET");
+    }
+
+    private Location getLocation() {
+        if (mLocation != null) {
+            return mLocation;
+        }
+        return null;
+    }
+
     @Override
     protected void onStart() {
         super.onStart();
@@ -248,6 +317,7 @@ public class MainActivity extends FragmentActivity {
     @Override
     protected void onResume() {
         super.onResume();
+
 
         mClient = getIntent().getStringExtra("client");
         mClientId = getIntent().getStringExtra("clientId");
@@ -268,10 +338,12 @@ public class MainActivity extends FragmentActivity {
         IntentFilter connectionSuccessIntentFilter = new IntentFilter(SocketService.SOCKET_CONNECTION_SUCCESS_ACTION);
         IntentFilter messageFromServerIntentFilter = new IntentFilter(SocketService.SOCKET_MESSAGE_FROM_SERVER_ACTION);
         IntentFilter connectionErrorIntentFilter = new IntentFilter(SocketService.SOCKET_CONNECTION_ERROR_ACTION);
+        IntentFilter messageFromServerFromWebIntentFilter = new IntentFilter(SocketService.SOCKET_MESSAGE_FROM_SERVER_FROM_WEB_ACTION);
 
         LocalBroadcastManager.getInstance(this).registerReceiver(receiver, connectionSuccessIntentFilter);
         LocalBroadcastManager.getInstance(this).registerReceiver(receiver, messageFromServerIntentFilter);
         LocalBroadcastManager.getInstance(this).registerReceiver(receiver, connectionErrorIntentFilter);
+        LocalBroadcastManager.getInstance(this).registerReceiver(receiver, messageFromServerFromWebIntentFilter);
 
         /**
          * LOCATION SERVICE BROADCAST REGISTER
@@ -334,15 +406,46 @@ public class MainActivity extends FragmentActivity {
                 Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
             }
 
+            if (intent.getAction().equals(SocketService.SOCKET_MESSAGE_FROM_SERVER_FROM_WEB_ACTION)) {
+                JSONObject object = null;
+                String messageContent = null;
+                String time = null;
+                String toClientId = null;
+                String clientName = null;
+                try {
+                    object = new JSONObject(intent.getStringExtra(SocketService.WEB_CLIENT_MESSAGE));
+                    messageContent = object.getString("content");
+                    time = object.getString("time");
+                    toClientId = object.getString("to_id_user_profile");
+                    String firstName = object.getJSONObject("toUser").getString("first_name");
+                    String lastName = object.getJSONObject("toUser").getString("last_name");
+                    clientName = firstName + " " + lastName;
+                } catch (JSONException e) {
+                    Log.d(TAG, "MAIN_ACTIVITY:MESSAGE_BODY_JSON_EXCEPTION");
+                    return;
+                }
+
+                if (messageContent != null && time != null && toClientId != null && clientName != null) {
+                    if (mFragment != null && mFragment instanceof MessageFragment) {
+                        ((MessageFragment) mFragment).addMessageToLocalList(messageContent, time, false);
+                    } else {
+                        showNotification(toClientId, clientName,"", messageContent);
+                    }
+                }
+            }
+
             /****************************
             * LOCATION SERVICE BROADCAST
             ****************************/
-//            if (intent.getAction().equals(LocationService.LOCATION_UPDATE_ACTION)) {
-//                Location location = intent.getParcelableExtra(LocationService.LOCATION_MESSAGE);
-//                //setCurrentLocation(location);
-//                //Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
-//            }
-
+            if (intent.getAction().equals(LocationService.LOCATION_UPDATE_ACTION)) {
+                Location location = intent.getParcelableExtra(LocationService.LOCATION_MESSAGE);
+                if (mFragment != null && mFragment instanceof MapFragment) {
+                    ((MapFragment)mFragment).setLocation(location);
+                } else {
+                    setLocation(location);
+                }
+                //Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
+            }
         }
     };
 }

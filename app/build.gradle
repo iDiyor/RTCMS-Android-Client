@@ -24,5 +24,5 @@ dependencies {
     compile 'com.android.support:appcompat-v7:22.1.1'
     compile 'com.google.android.gms:play-services:7.5.0'
     compile 'com.github.nkzawa:socket.io-client:0.5.2'
-    compile files('libs/Volley.jar')
+    compile 'com.github.jd-alexander:library:1.0.5'
 }

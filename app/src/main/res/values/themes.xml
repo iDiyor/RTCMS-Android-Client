@@ -22,6 +22,9 @@
         <item name="taskButtonStyle">@style/buttonStyleLight</item>
         <item name="emergencyButtonStyle">@style/emergencyButtonStyleLight</item>
         <item name="layoutBackgroundStyle">@style/mainLayoutStyleLight</item>
+        <item name="android:activatedBackgroundIndicator">@drawable/drawer_list_selector</item>
+        <item name="android:colorPrimary">@color/action_bar_backgroud_color</item>
+        <item name="android:textColorPrimary">@color/action_bar_text_color</item>
     </style>
 
     <!--<style name="AppTheme.Night">-->

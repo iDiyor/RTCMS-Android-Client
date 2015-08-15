@@ -83,26 +83,6 @@ public class MessageAdapter extends BaseAdapter {
 
     private void setAlignment(ViewHolder holder, boolean isMe) {
         if (!isMe) {
-            holder.mContentWithBG.setBackgroundResource(R.drawable.in_message_bg);
-
-            LinearLayout.LayoutParams layoutParams =
-                    (LinearLayout.LayoutParams) holder.mContentWithBG.getLayoutParams();
-            layoutParams.gravity = Gravity.RIGHT;
-            holder.mContentWithBG.setLayoutParams(layoutParams);
-
-            RelativeLayout.LayoutParams lp =
-                    (RelativeLayout.LayoutParams) holder.mContent.getLayoutParams();
-            lp.addRule(RelativeLayout.ALIGN_PARENT_LEFT, 0);
-            lp.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
-            holder.mContent.setLayoutParams(lp);
-            layoutParams = (LinearLayout.LayoutParams) holder.mTxtMessage.getLayoutParams();
-            layoutParams.gravity = Gravity.RIGHT;
-            holder.mTxtMessage.setLayoutParams(layoutParams);
-
-            layoutParams = (LinearLayout.LayoutParams) holder.mTxtInfo.getLayoutParams();
-            layoutParams.gravity = Gravity.RIGHT;
-            holder.mTxtInfo.setLayoutParams(layoutParams);
-        } else {
             holder.mContentWithBG.setBackgroundResource(R.drawable.out_message_bg);
 
             LinearLayout.LayoutParams layoutParams =
@@ -121,6 +101,26 @@ public class MessageAdapter extends BaseAdapter {
 
             layoutParams = (LinearLayout.LayoutParams) holder.mTxtInfo.getLayoutParams();
             layoutParams.gravity = Gravity.LEFT;
+            holder.mTxtInfo.setLayoutParams(layoutParams);
+        } else {
+            holder.mContentWithBG.setBackgroundResource(R.drawable.in_message_bg);
+
+            LinearLayout.LayoutParams layoutParams =
+                    (LinearLayout.LayoutParams) holder.mContentWithBG.getLayoutParams();
+            layoutParams.gravity = Gravity.RIGHT;
+            holder.mContentWithBG.setLayoutParams(layoutParams);
+
+            RelativeLayout.LayoutParams lp =
+                    (RelativeLayout.LayoutParams) holder.mContent.getLayoutParams();
+            lp.addRule(RelativeLayout.ALIGN_PARENT_LEFT, 0);
+            lp.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+            holder.mContent.setLayoutParams(lp);
+            layoutParams = (LinearLayout.LayoutParams) holder.mTxtMessage.getLayoutParams();
+            layoutParams.gravity = Gravity.RIGHT;
+            holder.mTxtMessage.setLayoutParams(layoutParams);
+
+            layoutParams = (LinearLayout.LayoutParams) holder.mTxtInfo.getLayoutParams();
+            layoutParams.gravity = Gravity.RIGHT;
             holder.mTxtInfo.setLayoutParams(layoutParams);
         }
     }

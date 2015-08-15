@@ -39,6 +39,7 @@ public class SocketService extends Service {
     public static final String SOCKET_CONNECTION_ERROR_ACTION = "SOCKET_CONNECTION_ERROR";
     public static final String SOCKET_CONNECTION_SUCCESS_ACTION = "SOCKET_CONNECTION_SUCCESS";
     public static final String SOCKET_MESSAGE_FROM_SERVER_ACTION = "SOCKET_MESSAGE_FROM_SERVER";
+    public static final String SOCKET_MESSAGE_FROM_SERVER_FROM_WEB_ACTION = "SOCKET_MESSAGE_FROM_SERVER_FROM_WEB_ACTION";
 
     // SOCKET EVENTS
     private static final String MOBILE_LOCATION_EMIT = "mobile:location";
@@ -48,10 +49,13 @@ public class SocketService extends Service {
     private static final String MOBILE_ON_MESSAGE_FROM_SERVER = "server:message";
     private static final String MOBILE_CLIENT_MESSAGE_SEND = "mobile:client:message:send";
 
+    private static String MOBILE_ON_MESSAGE_FROM_SERVER_FROM_WEB = "server:web:client:message:send:";
+
 
     // MESSAGE NAME
     public static final String CONNECTION_STATUS = "CONNECTION_STATUS";
     public static final String SERVER_SAID = "SERVER_SAID";
+    public static final String WEB_CLIENT_MESSAGE = "WEB_CLIENT_MESSAGE";
 
     private boolean IS_SERVICE_RUNNING = false;
 
@@ -79,6 +83,7 @@ public class SocketService extends Service {
                 mSocket.on(Socket.EVENT_CONNECT, onConnectToServer);
                 mSocket.on(Socket.EVENT_CONNECT_ERROR, onConnectError);
                 mSocket.on(MOBILE_ON_MESSAGE_FROM_SERVER, onMessageFromServer);
+                mSocket.on(MOBILE_ON_MESSAGE_FROM_SERVER_FROM_WEB, onMessageFromServerFromWeb);
                 mSocket.connect();
                 IS_SERVICE_RUNNING = true;
             }
@@ -97,7 +102,7 @@ public class SocketService extends Service {
 
         try {
             IO.Options options = new IO.Options();
-            options.forceNew = true;
+            //options.forceNew = true;
             options.reconnection = true;
 
             mSocket = IO.socket("http://52.28.143.209:3000", options);
@@ -140,13 +145,13 @@ public class SocketService extends Service {
         mClient = intent.getStringExtra("client");
         mClientId = intent.getStringExtra("clientId");
 
+        MOBILE_ON_MESSAGE_FROM_SERVER_FROM_WEB = "server:web:client:message:send:"  + mClientId;
+        Log.d(TAG, MOBILE_ON_MESSAGE_FROM_SERVER_FROM_WEB);
         // For each start request, send a message to start a job and deliver the
         // start ID so we know which request we're stopping when we finish the job
         Message msg = mServiceHandler.obtainMessage();
         msg.arg1 = startId;
         mServiceHandler.sendMessage(msg);
-
-        mClient = intent.getStringExtra("client");
 
         return START_STICKY;
     }
@@ -190,6 +195,7 @@ public class SocketService extends Service {
         public void call(Object... args) {
             JSONObject data;
             String message;
+
             try {
                 data = (JSONObject) args[0];
                 message = data.getString("status");
@@ -197,6 +203,20 @@ public class SocketService extends Service {
                 return;
             }
             broadcastIntentWithMessageWithAction(SERVER_SAID, message, SOCKET_MESSAGE_FROM_SERVER_ACTION);
+        }
+    };
+
+    private Emitter.Listener onMessageFromServerFromWeb = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            JSONObject data;
+            String message;
+
+            data = (JSONObject) args[0];
+            message = data.toString();
+
+            broadcastIntentWithMessageWithAction(WEB_CLIENT_MESSAGE, message, SOCKET_MESSAGE_FROM_SERVER_FROM_WEB_ACTION);
+            Log.d(TAG, "MESSAGE_TO_WEB");
         }
     };
 
@@ -309,6 +329,7 @@ public class SocketService extends Service {
         mSocket.off(Socket.EVENT_CONNECT, onConnectToServer);
         mSocket.off(Socket.EVENT_CONNECT_ERROR, onConnectError);
         mSocket.off(MOBILE_ON_MESSAGE_FROM_SERVER, onMessageFromServer);
+        mSocket.off(MOBILE_ON_MESSAGE_FROM_SERVER_FROM_WEB, onMessageFromServerFromWeb);
         mSocket.disconnect();
         mSocket = null;
         mLastKnownLocation = null;

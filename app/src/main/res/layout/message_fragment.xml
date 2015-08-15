@@ -1,4 +1,6 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:IDLib="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
@@ -8,24 +10,29 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:padding="20dp">
+        android:padding="20dp"
+        android:focusableInTouchMode="true"
+        android:descendantFocusability="beforeDescendants">
 
-        <EditText
+        <com.vodiytechnologies.rtcmsclient.TypefacedEditText
             android:id="@+id/messageInputEditText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
+            IDLib:fontNameForButton="@string/Roboto_Light"
             android:layout_toLeftOf="@+id/messageSendButton"
             android:autoText="true"
             android:hint="type message" />
 
-        <Button
+        <com.vodiytechnologies.rtcmsclient.TypefacedButton
             android:id="@+id/messageSendButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
             android:layout_alignParentRight="true"
-            android:background="@color/background_floating_material_dark"
+            style="?android:attr/borderlessButtonStyle"
+            android:background="@color/send_button_background_color"
+            IDLib:fontNameForButton="@string/Roboto_Light"
             android:text="Send"
             android:textColor="@color/background_material_light"/>
 
@@ -43,21 +50,23 @@
             android:transcriptMode="alwaysScroll"
             android:divider="@null" />
 
-        <TextView
-            android:id="@+id/selfTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="left|center_vertical"
-            android:text="Self"
-            android:singleLine="false"
-            android:textSize="20dp" />
-
-        <TextView
+        <com.vodiytechnologies.rtcmsclient.TypefacedTextView
             android:id="@+id/otherTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
+            android:layout_gravity="left|center_vertical"
+            IDLib:fontNameForButton="@string/Roboto_Light"
             android:text="Other"
+            android:singleLine="false"
+            android:textSize="20dp" />
+
+        <com.vodiytechnologies.rtcmsclient.TypefacedTextView
+            android:id="@+id/selfTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            IDLib:fontNameForButton="@string/Roboto_Light"
+            android:text="Self"
             android:textSize="20dp" />
 
     </RelativeLayout>
