@@ -6,16 +6,15 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.google.android.gms.maps.SupportMapFragment;
+
 /**
- * Created by Diyor on 8/10/2015.
+ * Created by Diyor on 8/15/2015.
  */
-public class HistoryFragment extends Fragment {
+public class CustomSupportMapFragment extends SupportMapFragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        final View fragmentView = inflater.inflate(R.layout.history_fragment, container, false);
-
-
-        return fragmentView;
+        return inflater.inflate(R.layout.support_map_fragment, container, false);
     }
 }

@@ -2,7 +2,7 @@ package com.vodiytechnologies.rtcmsclient;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.app.Fragment;
+import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,7 +11,7 @@ import android.widget.TextView;
 /**
  * Created by Diyor on 7/27/2015.
  */
-public class CommandCentreFragment extends Fragment{
+public class CommandCentreFragment extends Fragment {
 
     private TextView mCurrentStatusTextView;
 
