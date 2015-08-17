@@ -70,9 +70,11 @@ public class LoginActivity extends Activity {
                             String responseStatus;
                             String clientId;
                             String clientName;
+                            String driverId;
                             try {
                                 responseStatus = jsonObject.getString("responseStatus");
                                 clientId = jsonObject.getJSONObject("responseBody").getJSONObject("userProfile").getString("id_user_profile");
+                                driverId = jsonObject.getJSONObject("responseBody").getJSONObject("userProfile").getJSONObject("driverProfile").getString("id_driver");
                                 String firstName = jsonObject.getJSONObject("responseBody").getJSONObject("userProfile").getString("first_name");
                                 String lastName = jsonObject.getJSONObject("responseBody").getJSONObject("userProfile").getString("last_name");
                                 clientName = firstName + " " + lastName;
@@ -82,7 +84,7 @@ public class LoginActivity extends Activity {
                             }
                             Toast.makeText(getApplicationContext(), responseStatus, Toast.LENGTH_SHORT).show();
                             responseTextView.setText(jsonObject.toString());
-                            signIn(clientId,clientName);
+                            signIn(clientId, driverId, clientName);
                         }
                     }, new Response.ErrorListener() {
                         @Override
@@ -98,11 +100,12 @@ public class LoginActivity extends Activity {
         });
     }
 
-    private void signIn(String clientId ,String clientName) {
+    private void signIn(String clientId, String driverId, String clientName) {
         Intent intent = new Intent(this, MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         intent.putExtra("clientId", clientId);
+        intent.putExtra("driverId", driverId);
         intent.putExtra("client", clientName);
         startActivity(intent);
         finish();

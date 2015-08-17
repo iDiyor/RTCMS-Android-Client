@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:IDLib="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/message_fragment_background_color">
+
+    <FrameLayout
+        android:id="@+id/mapContainer"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent">
+    </FrameLayout>
+
+    <com.vodiytechnologies.rtcmsclient.TypefacedTextView
+        android:id="@+id/clientNameTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        IDLib:fontNameForButton="@string/Roboto_Bold"
+        android:textColor="@color/login_activity_text_view_color"
+        android:textSize="@dimen/job_details_text_size"/>
+    <com.vodiytechnologies.rtcmsclient.TypefacedTextView
+        android:id="@+id/fromAddressTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/clientNameTextView"
+        IDLib:fontNameForButton="@string/Roboto_Bold"
+        android:textColor="@color/login_activity_text_view_color"
+        android:textSize="@dimen/job_details_text_size"  />
+    <com.vodiytechnologies.rtcmsclient.TypefacedTextView
+        android:id="@+id/toAddressTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/fromAddressTextView"
+        IDLib:fontNameForButton="@string/Roboto_Bold"
+        android:textColor="@color/login_activity_text_view_color"
+        android:textSize="@dimen/job_details_text_size"/>
+    <com.vodiytechnologies.rtcmsclient.TypefacedTextView
+        android:id="@+id/timeTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/toAddressTextView"
+        IDLib:fontNameForButton="@string/Roboto_Bold"
+        android:textColor="@color/login_activity_text_view_color"
+        android:textSize="@dimen/job_details_text_size"/>
+    <com.vodiytechnologies.rtcmsclient.TypefacedTextView
+        android:id="@+id/phoneNumberTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/timeTextView"
+        IDLib:fontNameForButton="@string/Roboto_Bold"
+        android:textColor="@color/login_activity_text_view_color"
+        android:textSize="@dimen/job_details_text_size"/>
+    <com.vodiytechnologies.rtcmsclient.TypefacedButton
+        android:id="@+id/mapButton"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/button_height_size"
+        android:layout_below="@+id/phoneNumberTextView"
+        IDLib:fontNameForButton="@string/Roboto_Bold"
+        android:textColor="@color/login_activity_text_view_color"
+        android:text="Map"/>
+    <com.vodiytechnologies.rtcmsclient.TypefacedButton
+        android:id="@+id/ringbackButton"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/button_height_size"
+        android:layout_below="@+id/mapButton"
+        IDLib:fontNameForButton="@string/Roboto_Bold"
+        android:textColor="@color/login_activity_text_view_color"
+        android:text="Ringback"/>
+
+</RelativeLayout>

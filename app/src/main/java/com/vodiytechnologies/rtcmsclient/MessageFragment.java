@@ -47,6 +47,10 @@ public class MessageFragment extends Fragment {
 
     private static final String messageAPIUrl = "http://52.28.143.209:3000/api/messages";
 
+    // admin id == user profile id. Used for sending messages and others...
+    private final int mAdminId = 1;
+
+
     private String mClientId;
 
 
@@ -85,7 +89,7 @@ public class MessageFragment extends Fragment {
                 JSONObject params = null;
                 try {
                     params = new JSONObject();
-                    params.put("to_id_user_profile", 2);
+                    params.put("to_id_user_profile", mAdminId);
                     params.put("from_id_user_profile", mClientId);
                     params.put("content", newMessageContent);
                 } catch (JSONException e) {
@@ -187,7 +191,7 @@ public class MessageFragment extends Fragment {
         final RequestQueue mQueue = VolleySingleton.getInstance(getActivity().getApplicationContext()).getRequestQueue();
 
         // it will also response with admin messages
-        String getClietsMessagesAPIUrl = "http://52.28.143.209:3000/api/messages/" + mClientId + "/" + 2;
+        String getClietsMessagesAPIUrl = "http://52.28.143.209:3000/api/messages/" + mClientId + "/" + mAdminId;
 
         // get to_client messages
         JsonArrayRequest jsonReq1 = new JsonArrayRequest(getClietsMessagesAPIUrl,new Response.Listener<JSONArray>() {

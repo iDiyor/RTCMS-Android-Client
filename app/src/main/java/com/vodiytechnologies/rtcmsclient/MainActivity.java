@@ -17,6 +17,7 @@ import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.NavUtils;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -35,13 +36,14 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 
-public class MainActivity extends FragmentActivity {
+public class MainActivity extends FragmentActivity implements JobFragment.OnJobListSelectedListener, JobDetailsFragment.OnJobDetailsMapClickedListener{
 
     private static final String TAG = "MainActivity:Message";
 
 
     private String mClient;
     private String mClientId;
+    private String mDriverId;
     private String mClientCurrentStatus;
 
     private String[] mNavigationTitles;
@@ -58,6 +60,7 @@ public class MainActivity extends FragmentActivity {
     public static final String CURRENT_STATUS = "CURRENT_STATUS";
 
     private static final String SHOW_MESSAGE_FRAGMENT_ACTION = "SHOW_MESSAGE_FRAGMENT_ACTION";
+    private static final String SHOW_JOB_FRAGMENT_ACTION = "SHOW_JOB_FRAGMENT_ACTION";
 
     Fragment mFragment;
 
@@ -168,6 +171,25 @@ public class MainActivity extends FragmentActivity {
         }
     }
 
+    @Override
+    public void onListItemSelected(int position, Bundle args) {
+        JobDetailsFragment jobDetailsFragment = new JobDetailsFragment();
+        jobDetailsFragment.setArguments(args);
+
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        fragmentManager.beginTransaction().replace(R.id.content_frame, jobDetailsFragment).addToBackStack(null).commit();
+
+    }
+
+    @Override
+    public void onMapButtonClicked(Bundle args) {
+        MapFragment mapFragment = new MapFragment();
+        mapFragment.setArguments(args);
+
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        fragmentManager.beginTransaction().replace(R.id.content_frame, mapFragment).addToBackStack(null).commit();
+    }
+
     /* The click listener for ListView in the navigation drawer */
     private class DrawerItemClickListener implements ListView.OnItemClickListener {
         @Override
@@ -176,7 +198,7 @@ public class MainActivity extends FragmentActivity {
         }
     }
 
-    private void selectItem(int position) {
+    public void selectItem(int position) {
         // update the main content by replacing fragments
         mFragment = null;
         switch (position) {
@@ -204,14 +226,22 @@ public class MainActivity extends FragmentActivity {
                 mFragment = new HistoryFragment();
                 break;
             case 3: // Job
+            {
                 mFragment = new JobFragment();
-                break;
+                Bundle args = new Bundle();
+                args.putString("driverId", mDriverId);
+                args.putParcelable("myLocation", getLocation());
+                mFragment.setArguments(args);
+            }
+            break;
             case 4: // Map
+            {
                 mFragment = new MapFragment();
                 Bundle args = new Bundle();
                 args.putParcelable("myLocation", getLocation());
                 mFragment.setArguments(args);
-                break;
+            }
+            break;
             case 5: // User Profile
                 mFragment = new UserProfileFragment();
                 break;
@@ -275,7 +305,27 @@ public class MainActivity extends FragmentActivity {
 
         NotificationManager notificationManager = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
         notificationManager.notify(1, notification);
+    }
 
+    private void showJobNotification(String notificationTitle, String notificationMessage) {
+        Intent intent = new Intent(this, MainActivity.class);
+        //Intent intent = new Intent();
+        intent.setAction(SHOW_JOB_FRAGMENT_ACTION);
+        intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        int iUniqueId = (int) (System.currentTimeMillis() & 0xfffffff);
+        PendingIntent pIntent = PendingIntent.getActivity(getApplicationContext(),iUniqueId,intent,PendingIntent.FLAG_UPDATE_CURRENT);
+
+        Notification notification = new Notification.Builder(this)
+                .setContentTitle(notificationTitle)
+                .setContentText(notificationMessage)
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setContentIntent(pIntent)
+                .setAutoCancel(true).build();
+
+        notification.defaults |= Notification.DEFAULT_SOUND;
+
+        NotificationManager notificationManager = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
+        notificationManager.notify(1, notification);
     }
 
     @Override
@@ -287,6 +337,9 @@ public class MainActivity extends FragmentActivity {
                     mClientId = getIntent().getStringExtra("clientId");
                     mClient = getIntent().getStringExtra("client");
                     selectItem(1);
+                }
+                else if (action.equals(SHOW_JOB_FRAGMENT_ACTION)) {
+                    selectItem(3);
                 }
             }
         } catch (Exception e) {
@@ -318,6 +371,7 @@ public class MainActivity extends FragmentActivity {
 
         mClient = getIntent().getStringExtra("client");
         mClientId = getIntent().getStringExtra("clientId");
+        mDriverId = getIntent().getStringExtra("driverId");
 
         // Socket service
         Intent socketIntent = new Intent(MainActivity.this, SocketService.class);
@@ -336,11 +390,13 @@ public class MainActivity extends FragmentActivity {
         IntentFilter messageFromServerIntentFilter = new IntentFilter(SocketService.SOCKET_MESSAGE_FROM_SERVER_ACTION);
         IntentFilter connectionErrorIntentFilter = new IntentFilter(SocketService.SOCKET_CONNECTION_ERROR_ACTION);
         IntentFilter messageFromServerFromWebIntentFilter = new IntentFilter(SocketService.SOCKET_MESSAGE_FROM_SERVER_FROM_WEB_ACTION);
+        IntentFilter jobFromServerFromWebIntentFilter = new IntentFilter(SocketService.SOCKET_JOB_FROM_SERVER_FROM_WEB_ACTION);
 
         LocalBroadcastManager.getInstance(this).registerReceiver(receiver, connectionSuccessIntentFilter);
         LocalBroadcastManager.getInstance(this).registerReceiver(receiver, messageFromServerIntentFilter);
         LocalBroadcastManager.getInstance(this).registerReceiver(receiver, connectionErrorIntentFilter);
         LocalBroadcastManager.getInstance(this).registerReceiver(receiver, messageFromServerFromWebIntentFilter);
+        LocalBroadcastManager.getInstance(this).registerReceiver(receiver, jobFromServerFromWebIntentFilter);
 
         /**
          * LOCATION SERVICE BROADCAST REGISTER
@@ -427,6 +483,27 @@ public class MainActivity extends FragmentActivity {
                         ((MessageFragment) mFragment).addMessageToLocalList(messageContent, time, false);
                     } else {
                         showNotification(toClientId, clientName,"", messageContent);
+                    }
+                }
+            }
+
+            if (intent.getAction().equals(SocketService.SOCKET_JOB_FROM_SERVER_FROM_WEB_ACTION)) {
+                JSONObject jobObject = null;
+                String jobDescription = null;
+                try {
+                    JSONObject object = new JSONObject(intent.getStringExtra(SocketService.WEB_CLIENT_JOB));
+                    jobObject = object.getJSONObject("job");
+                    jobDescription = jobObject.getString("description");
+                } catch (JSONException e) {
+                    Log.d(TAG, "MAIN_ACTIVITY:JOB_BODY_JSON_EXCEPTION");
+                    return;
+                }
+
+                if (jobObject != null) {
+                    if (mFragment != null && mFragment instanceof JobFragment) {
+                        ((JobFragment) mFragment).addJob(jobObject);
+                    } else {
+                        showJobNotification("You have a new job", jobDescription);
                     }
                 }
             }

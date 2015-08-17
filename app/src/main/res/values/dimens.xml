@@ -11,6 +11,8 @@
     <dimen name="button_text_smaller_size">22sp</dimen>
     
     <dimen name="button_height_size">72dp</dimen>
+
+	<dimen name="job_details_text_size">22sp</dimen>
     
     <!-- SETTINGS ACTIVITY LIST TEXT SIZE -->
    	<dimen name="setting_name_text_size">24sp</dimen>

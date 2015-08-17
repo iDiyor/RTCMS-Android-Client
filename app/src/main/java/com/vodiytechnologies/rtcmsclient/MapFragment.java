@@ -38,6 +38,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Routing
     private static final String TAG = "MAP_FRAGMENT:LOG";
 
     private LatLng mLatlng;
+    private LatLng mSourceLocation;
+    private LatLng mDestinationLocation;
     private Location mLocation;
 
     private SupportMapFragment fragment;
@@ -45,19 +47,34 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Routing
     private MarkerOptions mMarkerMe;
     private GoogleMap mMap;
 
+    private boolean mIsRoute = false;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final View fragmentView = inflater.inflate(R.layout.map_fragment, container, false);
 
-        SupportMapFragment mapFragment = (SupportMapFragment)getChildFragmentManager().findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
-        //mMap = ((SupportMapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
-
         Location location = getArguments().getParcelable("myLocation");
         if (location != null) {
             setLocation(location);
         }
+
+
+        try {
+            LatLng sourceLocation = getArguments().getParcelable("sourceLocation");
+            LatLng destinationLocation = getArguments().getParcelable("destinationLocation");
+            if (sourceLocation != null && destinationLocation != null) {
+                mIsRoute = getArguments().getBoolean("isRoute");
+                mSourceLocation = sourceLocation;
+                mDestinationLocation = destinationLocation;
+            }
+        } catch (Exception e) {
+            Log.d(TAG, "Problem consuming args in map fragment");
+        }
+
+        SupportMapFragment mapFragment = (SupportMapFragment)getChildFragmentManager().findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
+        //mMap = ((SupportMapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
+
 
         Button openGoogleMapsButton = (Button) fragmentView.findViewById(R.id.openMapApp);
         openGoogleMapsButton.setOnClickListener(new View.OnClickListener() {
@@ -84,17 +101,20 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Routing
         map.addMarker(new MarkerOptions().position(mLatlng).title("My Location"));
         map.moveCamera(CameraUpdateFactory.newLatLng(mLatlng));
         map.moveCamera(CameraUpdateFactory.zoomTo(15));
-        //loadRoutes();
+
+        if (mIsRoute) {
+            loadRoutes(mSourceLocation, mDestinationLocation);
+        }
     }
 
-    private void loadRoutes() {
-        LatLng src = new LatLng(51.749387, -0.237282);
-        LatLng dest = new LatLng(51.717326, -0.283204);
+    private void loadRoutes(LatLng source, LatLng destination) {
+        //LatLng src = new LatLng(51.749387, -0.237282);
+        //LatLng dest = new LatLng(51.717326, -0.283204);
 
         Routing routing = new Routing.Builder()
                 .travelMode(Routing.TravelMode.DRIVING)
                 .withListener(this)
-                .waypoints(src, dest)
+                .waypoints(source, destination)
                 .build();
         routing.execute();
     }

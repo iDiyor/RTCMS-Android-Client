@@ -40,6 +40,7 @@ public class SocketService extends Service {
     public static final String SOCKET_CONNECTION_SUCCESS_ACTION = "SOCKET_CONNECTION_SUCCESS";
     public static final String SOCKET_MESSAGE_FROM_SERVER_ACTION = "SOCKET_MESSAGE_FROM_SERVER";
     public static final String SOCKET_MESSAGE_FROM_SERVER_FROM_WEB_ACTION = "SOCKET_MESSAGE_FROM_SERVER_FROM_WEB_ACTION";
+    public static final String SOCKET_JOB_FROM_SERVER_FROM_WEB_ACTION = "SOCKET_JOB_FROM_SERVER_FROM_WEB_ACTION";
 
     // SOCKET EVENTS
     private static final String MOBILE_LOCATION_EMIT = "mobile:location";
@@ -50,12 +51,14 @@ public class SocketService extends Service {
     private static final String MOBILE_CLIENT_MESSAGE_SEND = "mobile:client:message:send";
 
     private static String MOBILE_ON_MESSAGE_FROM_SERVER_FROM_WEB = "server:web:client:message:send:";
+    private static String MOBILE_ON_JOB_FROM_SERVER_FROM_WEB = "server:web:client:job:dispatch:";
 
 
     // MESSAGE NAME
     public static final String CONNECTION_STATUS = "CONNECTION_STATUS";
     public static final String SERVER_SAID = "SERVER_SAID";
     public static final String WEB_CLIENT_MESSAGE = "WEB_CLIENT_MESSAGE";
+    public static final String WEB_CLIENT_JOB = "WEB_CLIENT_JOB";
 
     private boolean IS_SERVICE_RUNNING = false;
 
@@ -84,6 +87,7 @@ public class SocketService extends Service {
                 mSocket.on(Socket.EVENT_CONNECT_ERROR, onConnectError);
                 mSocket.on(MOBILE_ON_MESSAGE_FROM_SERVER, onMessageFromServer);
                 mSocket.on(MOBILE_ON_MESSAGE_FROM_SERVER_FROM_WEB, onMessageFromServerFromWeb);
+                mSocket.on(MOBILE_ON_JOB_FROM_SERVER_FROM_WEB, onJobFromServerFromWeb);
                 mSocket.connect();
                 IS_SERVICE_RUNNING = true;
             }
@@ -146,7 +150,9 @@ public class SocketService extends Service {
         mClientId = intent.getStringExtra("clientId");
 
         MOBILE_ON_MESSAGE_FROM_SERVER_FROM_WEB = "server:web:client:message:send:"  + mClientId;
+        MOBILE_ON_JOB_FROM_SERVER_FROM_WEB = "server:web:client:job:dispatch:" + mClientId;
         Log.d(TAG, MOBILE_ON_MESSAGE_FROM_SERVER_FROM_WEB);
+        Log.d(TAG, MOBILE_ON_JOB_FROM_SERVER_FROM_WEB);
         // For each start request, send a message to start a job and deliver the
         // start ID so we know which request we're stopping when we finish the job
         Message msg = mServiceHandler.obtainMessage();
@@ -216,6 +222,20 @@ public class SocketService extends Service {
             message = data.toString();
 
             broadcastIntentWithMessageWithAction(WEB_CLIENT_MESSAGE, message, SOCKET_MESSAGE_FROM_SERVER_FROM_WEB_ACTION);
+            Log.d(TAG, "MESSAGE_TO_WEB");
+        }
+    };
+
+    private Emitter.Listener onJobFromServerFromWeb = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            JSONObject data;
+            String message;
+
+            data = (JSONObject) args[0];
+            message = data.toString();
+
+            broadcastIntentWithMessageWithAction(WEB_CLIENT_JOB, message, SOCKET_JOB_FROM_SERVER_FROM_WEB_ACTION);
             Log.d(TAG, "MESSAGE_TO_WEB");
         }
     };
@@ -330,6 +350,7 @@ public class SocketService extends Service {
         mSocket.off(Socket.EVENT_CONNECT_ERROR, onConnectError);
         mSocket.off(MOBILE_ON_MESSAGE_FROM_SERVER, onMessageFromServer);
         mSocket.off(MOBILE_ON_MESSAGE_FROM_SERVER_FROM_WEB, onMessageFromServerFromWeb);
+        mSocket.off(MOBILE_ON_JOB_FROM_SERVER_FROM_WEB, onJobFromServerFromWeb);
         mSocket.disconnect();
         mSocket = null;
         mLastKnownLocation = null;
