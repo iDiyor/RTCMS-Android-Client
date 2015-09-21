@@ -97,10 +97,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Routing
     public void onMapReady(GoogleMap map) {
 
         mMap = map;
-        // Add a marker
-        map.addMarker(new MarkerOptions().position(mLatlng).title("My Location"));
+
         map.moveCamera(CameraUpdateFactory.newLatLng(mLatlng));
         map.moveCamera(CameraUpdateFactory.zoomTo(15));
+        // Add a marker
+        map.addMarker(new MarkerOptions().position(mLatlng).title("My Location"));
+
 
         if (mIsRoute) {
             loadRoutes(mSourceLocation, mDestinationLocation);
@@ -197,7 +199,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Routing
 
     public void setLocation(Location location) {
         mLocation = location;
-        LatLng latlng = new LatLng(location.getLatitude(), location.getLongitude());
+        LatLng latlng = new LatLng(mLocation.getLatitude(), mLocation.getLongitude());
         setLatLng(latlng);
     }
 

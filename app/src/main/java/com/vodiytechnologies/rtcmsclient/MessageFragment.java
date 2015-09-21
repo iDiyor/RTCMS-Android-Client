@@ -48,7 +48,7 @@ public class MessageFragment extends Fragment {
     private static final String messageAPIUrl = "http://52.28.143.209:3000/api/messages";
 
     // admin id == user profile id. Used for sending messages and others...
-    private final int mAdminId = 1;
+    private final int mAdminId = 3;
 
 
     private String mClientId;
