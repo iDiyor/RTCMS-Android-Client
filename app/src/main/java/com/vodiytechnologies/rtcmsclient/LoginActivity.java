@@ -68,23 +68,23 @@ public class LoginActivity extends Activity {
                         public void onResponse(JSONObject jsonObject) {
 
                             String responseStatus;
-                            String clientId;
-                            String clientName;
-                            String driverId;
+                            String userProfileId;
+                            String userName; // user profile data
+                            String driverId; // driver profile data
                             try {
                                 responseStatus = jsonObject.getString("responseStatus");
-                                clientId = jsonObject.getJSONObject("responseBody").getJSONObject("userProfile").getString("id_user_profile");
+                                userProfileId = jsonObject.getJSONObject("responseBody").getJSONObject("userProfile").getString("id_user_profile");
                                 driverId = jsonObject.getJSONObject("responseBody").getJSONObject("userProfile").getJSONObject("driverProfile").getString("id_driver");
                                 String firstName = jsonObject.getJSONObject("responseBody").getJSONObject("userProfile").getString("first_name");
                                 String lastName = jsonObject.getJSONObject("responseBody").getJSONObject("userProfile").getString("last_name");
-                                clientName = firstName + " " + lastName;
+                                userName = firstName + " " + lastName;
                             } catch (JSONException e) {
                                 Log.d("JSONException","JSONException while JsonResponse");
                                 return;
                             }
                             Toast.makeText(getApplicationContext(), responseStatus, Toast.LENGTH_SHORT).show();
                             responseTextView.setText(jsonObject.toString());
-                            signIn(clientId, driverId, clientName);
+                            signIn(userProfileId, driverId, userName);
                         }
                     }, new Response.ErrorListener() {
                         @Override
@@ -100,13 +100,13 @@ public class LoginActivity extends Activity {
         });
     }
 
-    private void signIn(String clientId, String driverId, String clientName) {
+    private void signIn(String clientId, String driverId, String userName) {
         Intent intent = new Intent(this, MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        intent.putExtra("clientId", clientId);
+        intent.putExtra("userProfileId", clientId);
         intent.putExtra("driverId", driverId);
-        intent.putExtra("client", clientName);
+        intent.putExtra("userName", userName);
         startActivity(intent);
         finish();
     }

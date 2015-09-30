@@ -1,11 +1,14 @@
 package com.vodiytechnologies.rtcmsclient;
 
 import android.app.Activity;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,6 +21,10 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
+import com.baoyz.swipemenulistview.SwipeMenu;
+import com.baoyz.swipemenulistview.SwipeMenuCreator;
+import com.baoyz.swipemenulistview.SwipeMenuItem;
+import com.baoyz.swipemenulistview.SwipeMenuListView;
 import com.google.android.gms.maps.model.LatLng;
 
 import org.json.JSONArray;
@@ -34,7 +41,7 @@ public class JobFragment extends Fragment {
     OnJobListSelectedListener mCallback;
 
 
-    private ListView mListView;
+    private SwipeMenuListView mListView;
     private ArrayAdapter<String> mAdapter;
 
     private String mDriverId;
@@ -56,10 +63,48 @@ public class JobFragment extends Fragment {
         mDriverId = getArguments().getString("driverId");
         mMyLocation = getArguments().getParcelable("myLocation");
 
-        mListView = (ListView) fragmentView.findViewById(R.id.jobList);
+        mListView = (SwipeMenuListView) fragmentView.findViewById(R.id.jobList);
 
         setupAdapter();
         loadJobs();
+
+
+        SwipeMenuCreator creator = new SwipeMenuCreator() {
+            @Override
+            public void create(SwipeMenu swipeMenu) {
+                // create "open" item
+                SwipeMenuItem openItem = new SwipeMenuItem(getActivity());
+                // set item background
+                openItem.setBackground(new ColorDrawable(Color.rgb(0xE7, 0x4C, 0x3C))); //#e74c3c
+                // set item width
+                openItem.setWidth(dp2px(90));
+                // set item title
+                openItem.setTitle("Done");
+                // set item title fontsize
+                openItem.setTitleSize(18);
+                // set item title font color
+                openItem.setTitleColor(Color.WHITE);
+                // add to menu
+                swipeMenu.addMenuItem(openItem);
+            }
+        };
+
+        mListView.setMenuCreator(creator);
+
+        mListView.setOnMenuItemClickListener(new SwipeMenuListView.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(int position, SwipeMenu menu, int index) {
+                switch (index) {
+                    case 0:
+                        // done
+                        Toast.makeText(getActivity(), "Moved to History", Toast.LENGTH_SHORT).show();
+                        // delete
+                        //mAdapter.notifyDataSetChanged();
+                        break;
+                }
+                return false;
+            }
+        });
 
         mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -190,4 +235,9 @@ public class JobFragment extends Fragment {
         mAdapter = new ArrayAdapter<String>(getActivity(), R.layout.job_list_item, android.R.id.text1, mArrayList);
         mListView.setAdapter(mAdapter);
     }
+
+    private int dp2px(int dp) {
+        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, getResources().getDisplayMetrics());
+    }
+
 }
