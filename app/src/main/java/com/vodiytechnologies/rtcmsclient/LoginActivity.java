@@ -100,11 +100,11 @@ public class LoginActivity extends Activity {
         });
     }
 
-    private void signIn(String clientId, String driverId, String userName) {
+    private void signIn(String userProfileId, String driverId, String userName) {
         Intent intent = new Intent(this, MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        intent.putExtra("userProfileId", clientId);
+        intent.putExtra("userProfileId", userProfileId);
         intent.putExtra("driverId", driverId);
         intent.putExtra("userName", userName);
         startActivity(intent);

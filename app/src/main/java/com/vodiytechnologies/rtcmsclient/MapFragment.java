@@ -53,6 +53,13 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Routing
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final View fragmentView = inflater.inflate(R.layout.map_fragment, container, false);
 
+
+        SupportMapFragment mapFragment = (SupportMapFragment)getChildFragmentManager().findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
+        //mMap = ((SupportMapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
+
+
+
         Location location = getArguments().getParcelable("myLocation");
         if (location != null) {
             setLocation(location);
@@ -71,9 +78,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Routing
             Log.d(TAG, "Problem consuming args in map fragment");
         }
 
-        SupportMapFragment mapFragment = (SupportMapFragment)getChildFragmentManager().findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
-        //mMap = ((SupportMapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
+
 
 
         Button openGoogleMapsButton = (Button) fragmentView.findViewById(R.id.openMapApp);
@@ -98,10 +103,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Routing
 
         mMap = map;
 
-        map.moveCamera(CameraUpdateFactory.newLatLng(mLatlng));
+        map.moveCamera(CameraUpdateFactory.newLatLng(getLatLng()));
         map.moveCamera(CameraUpdateFactory.zoomTo(15));
         // Add a marker
-        map.addMarker(new MarkerOptions().position(mLatlng).title("My Location"));
+        map.addMarker(new MarkerOptions().position(getLatLng()).title("My Location"));
 
 
         if (mIsRoute) {

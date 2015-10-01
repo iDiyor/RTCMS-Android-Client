@@ -51,7 +51,7 @@ public class MessageFragment extends Fragment {
     private final int mAdminId = 3;
 
 
-    private String mClientId;
+    private String mUserProfileId;
 
 
 
@@ -59,7 +59,7 @@ public class MessageFragment extends Fragment {
     public View onCreateView (LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final View fragmentView = inflater.inflate(R.layout.message_fragment, container, false);
 
-        mClientId = getArguments().getString("clientId");
+        mUserProfileId = getArguments().getString("userProfileId");
 
 
         mMessageContainer = (ListView) fragmentView.findViewById(R.id.messagesContainer);
@@ -90,7 +90,7 @@ public class MessageFragment extends Fragment {
                 try {
                     params = new JSONObject();
                     params.put("to_id_user_profile", mAdminId);
-                    params.put("from_id_user_profile", mClientId);
+                    params.put("from_id_user_profile", mUserProfileId);
                     params.put("content", newMessageContent);
                 } catch (JSONException e) {
                     Toast.makeText(getActivity(), "Could not send the message", Toast.LENGTH_SHORT).show();
@@ -191,7 +191,7 @@ public class MessageFragment extends Fragment {
         final RequestQueue mQueue = VolleySingleton.getInstance(getActivity().getApplicationContext()).getRequestQueue();
 
         // it will also response with admin messages
-        String getClietsMessagesAPIUrl = "http://52.28.143.209:3000/api/messages/" + mClientId + "/" + mAdminId;
+        String getClietsMessagesAPIUrl = "http://52.28.143.209:3000/api/messages/" + mUserProfileId + "/" + mAdminId;
 
         // get to_client messages
         JsonArrayRequest jsonReq1 = new JsonArrayRequest(getClietsMessagesAPIUrl,new Response.Listener<JSONArray>() {
@@ -206,7 +206,7 @@ public class MessageFragment extends Fragment {
                             String time = objectX.getString("time");
                             String fromClient = objectX.getString("from_id_user_profile");
 
-                            if (fromClient.equals(mClientId)) {
+                            if (fromClient.equals(mUserProfileId)) {
                                 addMessageToLocalList(messageContent, time, true);
                             } else {
                                 addMessageToLocalList(messageContent, time, false);

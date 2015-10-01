@@ -41,8 +41,8 @@ public class MainActivity extends FragmentActivity implements JobFragment.OnJobL
     private static final String TAG = "MainActivity:Message";
 
 
-    private String mClient;
-    private String mClientId;
+    private String mUserName;
+    private String mUserProfileId;
     private String mDriverId;
     private String mClientCurrentStatus;
 
@@ -218,7 +218,7 @@ public class MainActivity extends FragmentActivity implements JobFragment.OnJobL
             {
                 mFragment = new MessageFragment();
                 Bundle args = new Bundle();
-                args.putString("clientId", mClientId);
+                args.putString("userProfileId", mUserProfileId);
                 mFragment.setArguments(args);
             }
             break;
@@ -243,8 +243,13 @@ public class MainActivity extends FragmentActivity implements JobFragment.OnJobL
             }
             break;
             case 5: // User Profile
+            {
                 mFragment = new UserProfileFragment();
-                break;
+                Bundle args = new Bundle();
+                args.putString("userName", mUserName);
+                mFragment.setArguments(args);
+            }
+            break;
             default:
                 break;
         }
@@ -334,8 +339,8 @@ public class MainActivity extends FragmentActivity implements JobFragment.OnJobL
             String action = intent.getAction();
             if (action != null) {
                 if (action.equals(SHOW_MESSAGE_FRAGMENT_ACTION)) {
-                    mClientId = getIntent().getStringExtra("clientId");
-                    mClient = getIntent().getStringExtra("client");
+                    mUserProfileId = getIntent().getStringExtra("userProfileId");
+                    mUserName = getIntent().getStringExtra("userName");
                     selectItem(1);
                 }
                 else if (action.equals(SHOW_JOB_FRAGMENT_ACTION)) {
@@ -369,14 +374,14 @@ public class MainActivity extends FragmentActivity implements JobFragment.OnJobL
         super.onResume();
 
 
-        mClient = getIntent().getStringExtra("client");
-        mClientId = getIntent().getStringExtra("clientId");
+        mUserName = getIntent().getStringExtra("userName");
+        mUserProfileId = getIntent().getStringExtra("userProfileId");
         mDriverId = getIntent().getStringExtra("driverId");
 
         // Socket service
         Intent socketIntent = new Intent(MainActivity.this, SocketService.class);
-        socketIntent.putExtra("clientId", mClientId);
-        socketIntent.putExtra("client", mClient);
+        socketIntent.putExtra("userProfileId", mUserProfileId);
+        socketIntent.putExtra("userName", mUserName);
         startService(socketIntent);
         // Location service
         Intent locationIntent = new Intent(MainActivity.this, LocationService.class);
@@ -515,6 +520,7 @@ public class MainActivity extends FragmentActivity implements JobFragment.OnJobL
                 Location location = intent.getParcelableExtra(LocationService.LOCATION_MESSAGE);
                 if (mFragment != null && mFragment instanceof MapFragment) {
                     ((MapFragment)mFragment).setLocation(location);
+                    setLocation(location);
                 } else {
                     setLocation(location);
                 }

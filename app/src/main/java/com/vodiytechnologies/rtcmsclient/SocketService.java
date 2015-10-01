@@ -62,8 +62,8 @@ public class SocketService extends Service {
 
     private boolean IS_SERVICE_RUNNING = false;
 
-    private String mClient; // client name == user name inside user profile table
-    private String mClientId; // client id == user id from user profile table
+    private String mUserName; // user name == user name inside user profile table
+    private String mUserProfileId; // user profile id == user id from user profile table
 
     private Socket mSocket;
 
@@ -146,11 +146,11 @@ public class SocketService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         super.onStartCommand(intent, flags, startId);
 
-        mClient = intent.getStringExtra("client");
-        mClientId = intent.getStringExtra("clientId");
+        mUserName = intent.getStringExtra("userName");
+        mUserProfileId = intent.getStringExtra("userProfileId");
 
-        MOBILE_ON_MESSAGE_FROM_SERVER_FROM_WEB = "server:web:client:message:send:"  + mClientId;
-        MOBILE_ON_JOB_FROM_SERVER_FROM_WEB = "server:web:client:job:dispatch:" + mClientId;
+        MOBILE_ON_MESSAGE_FROM_SERVER_FROM_WEB = "server:web:client:message:send:"  + mUserProfileId;
+        MOBILE_ON_JOB_FROM_SERVER_FROM_WEB = "server:web:client:job:dispatch:" + mUserProfileId;
         Log.d(TAG, MOBILE_ON_MESSAGE_FROM_SERVER_FROM_WEB);
         Log.d(TAG, MOBILE_ON_JOB_FROM_SERVER_FROM_WEB);
         // For each start request, send a message to start a job and deliver the
@@ -178,8 +178,8 @@ public class SocketService extends Service {
             try {
                 data = new JSONObject();
                 data.put("type", "mobile");
-                data.put("clientId", mClientId);
-                data.put("client", mClient);
+                data.put("clientId", mUserProfileId);
+                data.put("client", mUserName);
                 data.put("clientStatus", "No Job");
                 data.put("lastKnowLocation", getLocationJSONObject(mLastKnownLocation));
 
@@ -284,8 +284,8 @@ public class SocketService extends Service {
             JSONObject data;
             try {
                 data = new JSONObject();
-                data.put("clientId", mClientId);
-                data.put("client", mClient);
+                data.put("clientId", mUserProfileId);
+                data.put("client", mUserName);
                 data.put("longitude", location.getLongitude());
                 data.put("latitude", location.getLatitude());
                 data.put("accuracy", location.getAccuracy());
@@ -300,8 +300,8 @@ public class SocketService extends Service {
             JSONObject data;
             try {
                 data = new JSONObject();
-                data.put("clientId", mClientId);
-                data.put("client", mClient);
+                data.put("clientId", mUserProfileId);
+                data.put("client", mUserName);
                 data.put("longitude", 0);
                 data.put("latitude", 0);
                 data.put("accuracy", 0);
@@ -319,8 +319,8 @@ public class SocketService extends Service {
         JSONObject data;
         try {
             data = new JSONObject();
-            data.put("clientId", mClientId);
-            data.put("client", mClient);
+            data.put("clientId", mUserProfileId);
+            data.put("client", mUserName);
             data.put("clientStatus", status);
         } catch (JSONException e) {
             return null;
@@ -338,8 +338,8 @@ public class SocketService extends Service {
         try {
             data = new JSONObject();
             data.put("type", "mobile");
-            data.put("clientId", mClientId);
-            data.put("client", mClient);
+            data.put("clientId", mUserProfileId);
+            data.put("client", mUserName);
             //data.put("last_known_position", getLocationJSONObject(mLastKnownLocation));
         } catch (JSONException e) {
             return;
