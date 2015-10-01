@@ -26,6 +26,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
@@ -54,17 +55,14 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Routing
         final View fragmentView = inflater.inflate(R.layout.map_fragment, container, false);
 
 
-        SupportMapFragment mapFragment = (SupportMapFragment)getChildFragmentManager().findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
-        //mMap = ((SupportMapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
-
-
-
         Location location = getArguments().getParcelable("myLocation");
         if (location != null) {
             setLocation(location);
         }
 
+        SupportMapFragment mapFragment = (SupportMapFragment)getChildFragmentManager().findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
+        //mMap = ((SupportMapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
 
         try {
             LatLng sourceLocation = getArguments().getParcelable("sourceLocation");
@@ -77,8 +75,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Routing
         } catch (Exception e) {
             Log.d(TAG, "Problem consuming args in map fragment");
         }
-
-
 
 
         Button openGoogleMapsButton = (Button) fragmentView.findViewById(R.id.openMapApp);
@@ -95,19 +91,18 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Routing
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-
     }
 
     @Override
     public void onMapReady(GoogleMap map) {
 
         mMap = map;
-
-        map.moveCamera(CameraUpdateFactory.newLatLng(getLatLng()));
-        map.moveCamera(CameraUpdateFactory.zoomTo(15));
+        //map.setMyLocationEnabled(true);
+        map.moveCamera(CameraUpdateFactory.newLatLngZoom(getLatLng(), 13));
         // Add a marker
-        map.addMarker(new MarkerOptions().position(getLatLng()).title("My Location"));
-
+        map.addMarker(new MarkerOptions()
+                .icon(BitmapDescriptorFactory.fromResource(R.mipmap.my_location))
+                .position(getLatLng()).title("My Location"));
 
         if (mIsRoute) {
             loadRoutes(mSourceLocation, mDestinationLocation);
@@ -139,10 +134,17 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Routing
     @Override
     public void onRoutingSuccess(PolylineOptions polylineOptions, Route route) {
         PolylineOptions polyoptions = new PolylineOptions();
-        polyoptions.color(Color.GREEN);
+        polyoptions.color(Color.BLUE);
         polyoptions.width(10);
         polyoptions.addAll(polylineOptions.getPoints());
         mMap.addPolyline(polyoptions);
+
+        mMap.addMarker(new MarkerOptions()
+                .icon(BitmapDescriptorFactory.fromResource(R.mipmap.pickup))
+                .position(mSourceLocation).title("Pick-up location"));
+        mMap.addMarker(new MarkerOptions()
+                .icon(BitmapDescriptorFactory.fromResource(R.mipmap.dropoff))
+                .position(mDestinationLocation).title("Drop-off location"));
     }
 
     @Override
