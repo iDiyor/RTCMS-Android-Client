@@ -27,7 +27,7 @@ public class LoginActivity extends Activity {
     private EditText mUsernameTextView;
     private EditText mPasswordTextView;
 
-    private final String authUrl = "http://52.28.143.209:3000/api/user/authenticate";
+    private final String authUrl = "http://52.29.78.245:3000/api/user/authenticate";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {

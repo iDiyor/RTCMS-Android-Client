@@ -109,7 +109,7 @@ public class SocketService extends Service {
             //options.forceNew = true;
             options.reconnection = true;
 
-            mSocket = IO.socket("http://52.28.143.209:3000", options);
+            mSocket = IO.socket("http://52.29.78.245:3000", options);
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }

@@ -182,7 +182,7 @@ public class JobFragment extends Fragment {
 
         final RequestQueue mQueue = VolleySingleton.getInstance(getActivity().getApplicationContext()).getRequestQueue();
 
-        String getJobsUrl = "http://52.28.143.209:3000/api/jobs/driver/" + mDriverId;
+        String getJobsUrl = "http://52.29.78.245:3000/api/jobs/driver/" + mDriverId;
 
         JsonArrayRequest jsonReq1 = new JsonArrayRequest(getJobsUrl,new Response.Listener<JSONArray>() {
             @Override
